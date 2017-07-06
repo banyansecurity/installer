@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: banyan-netagent
+  labels:
+    app: banyan-netagent
+    version: v1
+
+spec:
+  template:
+    metadata:
+      labels:
+        name: banyan-agent
+    spec:
+        containers:
+          - image: pub.banyanops.com/netagent:0.3.5
+            name: banyan-agent
+            args: ["-h", "10.255.0.114:1200"]
+            securityContext:
+              privileged: true
+            volumeMounts:
+              - name: kernel-debug
+                mountPath: /sys/kernel/debug
+              - name: dockersock
+                mountPath: /var/run/docker.sock
+
+        volumes:
+          - name: kernel-debug
+            hostPath:
+              path: /sys/kernel/debug
+          - name: dockersock
+            hostPath:
+              path: /var/run/docker.sock
