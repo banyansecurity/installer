@@ -3,11 +3,9 @@
 ## Working
 - Puppet
 - Chef
-
-## Placeholders only right now
 - Kubernetes (Daemon Set)
 - Python
 
-## Empty
+## Need to Create
 - Docker
 - Ansible
