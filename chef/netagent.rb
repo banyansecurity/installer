@@ -1,6 +1,6 @@
 
-version = "0.4.0" unless (node["banyan"] && node["banyan"]["netagent"]["version"])
-shield_addr = "10.10.10.10:1200" unless (node["banyan"] && node["banyan"]["netagent"]["shield_addr"])
+version = "UNSET" unless (node["banyan"] && node["banyan"]["netagent"]["version"])
+shield_addr = "UNSET" unless (node["banyan"] && node["banyan"]["netagent"]["shield_addr"])
 gpg_password = "UNSET" unless (node["banyan"] && node["banyan"]["netagent"]["gpg_password"])
 server_cidr = "UNSET" unless (node["banyan"] && node["banyan"]["netagent"]["server_cidr"])
 client_cidr = "UNSET" unless (node["banyan"] && node["banyan"]["netagent"]["client_cidr"])
