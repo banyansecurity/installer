@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: shield-ca
+  labels:
+    app: banyan-platform
+spec:
+  # if your cluster supports it, uncomment the following to automatically create
+  # an external load-balanced IP for the frontend service.
+  # type: LoadBalancer
+  clusterIP: 10.0.230.182
+  ports:
+    # the port that this service should serve on
+  - port: 1200
+  selector:
+    app: banyan-platform
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: shield-ca
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: banyan-platform
+    spec:
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+      - name: banyan-dir
+        hostPath:
+          path: /tmp   
+      - name: kubeconfig-dir
+        hostPath:
+          #path: /home/azureuser/.kube
+          path: /tmp
+      - name: keystore-dir
+        emptyDir: {}
+        #hostPath:
+        #  path: /tmp #/.banyan/keystore      
+      containers:
+      - name: shield
+        image: pub.banyanops.com/shield:incluster
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        env:
+        - name: GET_HOSTS_FROM
+          value: dns
+          # If your cluster config does not include a dns service, then to
+          # instead access environment variables to find service host
+          # info, comment out the 'value: dns' line above, and uncomment the
+          # line below.
+          # value: env
+        - name: BANYAN_HOST_DIR
+          value: /root/.banyan
+        - name: ORG_ID
+          value: 5f7a1ded-c254-4546-9b44-3fed955fac10
+        args:  
+        - "--banyanURL=https://stage.banyanops.com:443/api_server_host_v1"
+        - "--clustermanager=kubernetes"
+        - "--cfgfile=/root/.kube/config"
+        - "--clustername=istiocluster-jgistiotestrg-72b1e8"
+        - "--groupType=test"
+        - "--cloglevel=DEBUG"
+        - "--floglevel=DEBUG"      
+        ports:
+        - containerPort: 1200
+        volumeMounts:
+        - mountPath: /var/run/docker.sock
+          name: docker-sock
+          readOnly: false
+        - mountPath: /banyandir
+          name: banyan-dir
+          readOnly: false  
+        - mountPath: /root/.kube
+          name: kubeconfig-dir
+          readOnly: true
+      - name: cfssl
+        image: cfssl/cfssl:1.2.0
+        imagePullPolicy: IfNotPresent
+        args: 
+        - "serve" 
+        - "-config=/etc/cfssl/root_config.json" 
+        - "-ca=/etc/cfssl/ca.pem" 
+        - "-ca-key=/etc/cfssl/ca-key.pem"
+        volumeMounts:
+        - name: keystore-dir
+          mountPath: /etc/cfssl
+      # These containers are run during pod initialization
+      initContainers:
+      - name: init-ca
+        image: pub.banyanops.com/banyanops/init-ca
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: keystore-dir
+          mountPath: /initca/keystore
+      nodeSelector:
+        shieldloc: master   
