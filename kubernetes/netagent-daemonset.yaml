@@ -2,69 +2,71 @@ apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
   name: banyan-netagent
-  labels:
-    app: banyan-platform
-    version: v1
 
 spec:
   template:
     metadata:
       labels:
-        name: banyan-netagent
+        com.banyanops.agent: netagent
+        com.banyanops.app: banyan-platform
+    
     spec:
-        hostNetwork: true
-        hostPID: true
-        containers:
-          - image: pub.banyanops.com/k8s-netagent:0.5.0-rc5
-            imagePullPolicy: Always
-            name: netagent
-            args: ["-h", "10.0.230.182:1200"]
-            securityContext:
-              privileged: true
-            volumeMounts:
-              - name: kernel-debug
-                mountPath: /sys/kernel/debug
-              - name: dockersock
-                mountPath: /var/run/docker.sock
-              - name: banyan-dir
-                mountPath: /root/.banyan
-                readOnly: false 
-            env:
-            - name: GET_HOSTS_FROM
-              value: dns
-              # If your cluster config does not include a dns service, then to
-              # instead access environment variables to find service host
-              # info, comment out the 'value: dns' line above, and uncomment the
-              # line below.
-              # value: env
-            - name: BANYAN_HOST_DIR
-              value: /root/.banyan
-            lifecycle:
-              preStop:
-                exec:
-                  command: ["/opt/banyan/on-stop.sh"]
-          # These containers are run during pod initialization
-        initContainers:
-        - name: init-agent
-          image: pub.banyanops.com/k8s-netagent:0.5.0-rc5
-          command: ["/opt/banyan/on-start.sh"]
-          imagePullPolicy: Always
-          securityContext:
-              privileged: true
-          volumeMounts:
-          - name: gpg-cidr
-            mountPath: /secret
-            readOnly: true    
-        volumes:
+      hostNetwork: true
+      hostPID: true
+      
+      volumes:
+      - name: kernel-debug
+        hostPath:
+          path: /sys/kernel/debug
+      - name: banyan-dir
+        hostPath:
+          path: /tmp     
+      - name: dockersock
+        hostPath:
+          path: /var/run/docker.sock
+      - name: gpg-cidr
+        secret:
+          secretName: bnn-secrets      
+
+      containers:
+      - name: netagent
+        image: pub.banyanops.com/k8s-netagent:0.5.0-rc5
+        imagePullPolicy: Always
+        # UPDATEME: set the Banyan Shield Service's clusterIP
+        args: ["-h", "10.0.0.111:1200"]
+        securityContext:
+          privileged: true
+        volumeMounts:
           - name: kernel-debug
-            hostPath:
-              path: /sys/kernel/debug
-          - name: banyan-dir
-            hostPath:
-              path: /tmp     
+            mountPath: /sys/kernel/debug
           - name: dockersock
-            hostPath:
-              path: /var/run/docker.sock
-          - name: gpg-cidr
-            secret:
-              secretName: bnn-secrets      
+            mountPath: /var/run/docker.sock
+          - name: banyan-dir
+            mountPath: /root/.banyan
+            readOnly: false 
+        env:
+        - name: GET_HOSTS_FROM
+          value: dns
+          # If your cluster config does not include a dns service, then to
+          # instead access environment variables to find service host
+          # info, comment out the 'value: dns' line above, and uncomment the
+          # line below.
+          # value: env
+        - name: BANYAN_HOST_DIR
+          value: /root/.banyan
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/opt/banyan/on-stop.sh"]
+      
+      initContainers:
+      - name: init-agent
+        image: pub.banyanops.com/k8s-netagent:0.5.0-rc5
+        command: ["/opt/banyan/on-start.sh"]
+        imagePullPolicy: Always
+        securityContext:
+            privileged: true
+        volumeMounts:
+        - name: gpg-cidr
+          mountPath: /secret
+          readOnly: true    

@@ -1,30 +1,32 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: shield-ca
-  labels:
-    app: banyan-platform
+  name: banyan-shield-ca
+
 spec:
-  # if your cluster supports it, uncomment the following to automatically create
-  # an external load-balanced IP for the frontend service.
-  # type: LoadBalancer
-  clusterIP: 10.0.230.182
+  type: ClusterIP
+  # UPDATEME: clusterIP should be a valid number within the Service ClusterIP Range
+  clusterIP: 10.0.0.111
   ports:
-    # the port that this service should serve on
   - port: 1200
   selector:
-    app: banyan-platform
+    com.banyanops.agent: shield
+
 ---
+
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: shield-ca
+  name: banyan-shield-ca
+
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: banyan-platform
+        com.banyanops.agent: shield
+        com.banyanops.app: banyan-platform
+    
     spec:
       volumes:
       - name: docker-sock
@@ -40,7 +42,8 @@ spec:
       - name: keystore-dir
         emptyDir: {}
         #hostPath:
-        #  path: /tmp #/.banyan/keystore      
+        #  path: /tmp #/.banyan/keystore
+
       containers:
       - name: shield
         image: pub.banyanops.com/shield:incluster
@@ -59,13 +62,15 @@ spec:
           # value: env
         - name: BANYAN_HOST_DIR
           value: /root/.banyan
+        # UPDATEME: ORG_ID's value is a 32-char string available in your Web Dashboard
         - name: ORG_ID
-          value: 5f7a1ded-c254-4546-9b44-3fed955fac10
-        args:  
+          value: aaaaaaaa-bbbb-cccc-0000-111122223333
+        args:
+        # UPDATEME: clustername should be the same as in your cfgfile
         - "--banyanURL=https://stage.banyanops.com:443/api_server_host_v1"
         - "--clustermanager=kubernetes"
         - "--cfgfile=/root/.kube/config"
-        - "--clustername=istiocluster-jgistiotestrg-72b1e8"
+        - "--clustername=MyKubeCluster"
         - "--groupType=test"
         - "--cloglevel=DEBUG"
         - "--floglevel=DEBUG"      
@@ -92,7 +97,7 @@ spec:
         volumeMounts:
         - name: keystore-dir
           mountPath: /etc/cfssl
-      # These containers are run during pod initialization
+
       initContainers:
       - name: init-ca
         image: pub.banyanops.com/banyanops/init-ca
@@ -100,5 +105,10 @@ spec:
         volumeMounts:
         - name: keystore-dir
           mountPath: /initca/keystore
+
+      # UPDATEME: ensure Shield runs on your master
+      # you can label the master and make it schedulable via these commands:
+      #   kubectl label nodes master-0 shieldrunner=true
+      #   kubectl patch node master-0 -p '{"spec":{"unschedulable":false}}'
       nodeSelector:
-        shieldloc: master   
+        shieldrunner: "true"
