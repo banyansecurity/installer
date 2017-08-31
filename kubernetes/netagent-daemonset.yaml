@@ -21,7 +21,7 @@ spec:
       - name: banyan-dir
         hostPath:
           path: /tmp     
-      - name: dockersock
+      - name: docker-sock
         hostPath:
           path: /var/run/docker.sock
       - name: gpg-cidr
@@ -32,14 +32,19 @@ spec:
       - name: netagent
         image: pub.banyanops.com/k8s-netagent:0.5.0-rc5
         imagePullPolicy: Always
-        # UPDATEME: set the Banyan Shield Service's clusterIP
-        args: ["-h", "10.0.0.111:1200"]
         securityContext:
-          privileged: true
+          privileged: true        
+        args:
+        - "--hostOnly" 
+        - "--kubelet"
+        - "--kubeletAddr=http://localhost:10255"
+        # UPDATEME: set the Banyan Shield Service's clusterIP
+        # FIXME-0.5        
+        - "10.233.0.111:1200"
         volumeMounts:
           - name: kernel-debug
             mountPath: /sys/kernel/debug
-          - name: dockersock
+          - name: docker-sock
             mountPath: /var/run/docker.sock
           - name: banyan-dir
             mountPath: /root/.banyan
