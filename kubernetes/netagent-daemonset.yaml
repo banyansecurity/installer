@@ -12,6 +12,7 @@ spec:
     
     spec:
       hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       hostPID: true
       
       volumes:
@@ -38,9 +39,7 @@ spec:
         - "--hostOnly" 
         - "--kubelet"
         - "--kubeletAddr=http://localhost:10255"
-        # UPDATEME: set the Banyan Shield Service's clusterIP
-        # FIXME-0.5        
-        - "10.233.0.111:1200"
+        - "shield-ca:1200"
         volumeMounts:
           - name: kernel-debug
             mountPath: /sys/kernel/debug
