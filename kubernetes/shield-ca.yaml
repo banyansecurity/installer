@@ -6,6 +6,7 @@ metadata:
 spec:
   type: ClusterIP
   # UPDATEME: clusterIP should be a valid number within the Service ClusterIP Range
+  # FIXME-0.5
   clusterIP: 10.0.0.111
   ports:
   - port: 1200
@@ -72,8 +73,8 @@ spec:
         - "--cfgfile=/root/.kube/config"
         - "--clustername=MyKubeCluster"
         - "--groupType=test"
-        - "--cloglevel=DEBUG"
-        - "--floglevel=DEBUG"      
+        - "--cloglevel=ERR"
+        - "--floglevel=INFO"      
         ports:
         - containerPort: 1200
         volumeMounts:
