@@ -31,7 +31,7 @@ spec:
 
       containers:
       - name: netagent
-        image: pub.banyanops.com/k8s-netagent:0.5.0-rc5
+        image: pub.banyanops.com/k8s-netagent:0.5.0-rc7
         imagePullPolicy: Always
         securityContext:
           privileged: true        
@@ -65,7 +65,7 @@ spec:
       
       initContainers:
       - name: init-agent
-        image: pub.banyanops.com/k8s-netagent:0.5.0-rc5
+        image: pub.banyanops.com/k8s-netagent:0.5.0-rc7
         command: ["/opt/banyan/on-start.sh"]
         imagePullPolicy: Always
         securityContext:
