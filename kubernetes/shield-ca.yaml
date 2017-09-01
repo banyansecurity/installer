@@ -5,6 +5,9 @@ metadata:
 
 spec:
   type: ClusterIP
+  # UPDATEME: clusterIP should be a valid number within the Service ClusterIP Range
+  # FIXME-0.5
+  clusterIP: 10.0.0.111  
   ports:
   - port: 1200
   selector:
