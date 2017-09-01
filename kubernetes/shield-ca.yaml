@@ -5,9 +5,6 @@ metadata:
 
 spec:
   type: ClusterIP
-  # UPDATEME: clusterIP should be a valid number within the Service ClusterIP Range
-  # FIXME-0.5
-  clusterIP: 10.0.0.111  
   ports:
   - port: 1200
   selector:
@@ -46,6 +43,22 @@ spec:
         emptyDir: {}
 
       containers:
+      - name: cfssl
+        image: cfssl/cfssl:1.2.0
+        imagePullPolicy: IfNotPresent
+        # TODO: better numbers here
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi        
+        args: 
+        - "serve" 
+        - "-config=/etc/cfssl/root_config.json" 
+        - "-ca=/etc/cfssl/ca.pem" 
+        - "-ca-key=/etc/cfssl/ca-key.pem"
+        volumeMounts:
+        - name: keystore-dir
+          mountPath: /etc/cfssl        
       - name: shield
         image: pub.banyanops.com/shield:incluster
         imagePullPolicy: Always
@@ -55,7 +68,7 @@ spec:
             cpu: 200m
             memory: 200Mi
         env:
-        # DNS Service 1/1: If your cluster config does not include a dns service, 
+        # DNS Service: If your cluster config does not include a dns service, 
         # set value to `env` to access environment variables to find service host info
         - name: GET_HOSTS_FROM
           value: dns
@@ -88,17 +101,6 @@ spec:
         #- mountPath: /root/.kube
         #  name: kubeconfig-dir
         #  readOnly: true
-      - name: cfssl
-        image: cfssl/cfssl:1.2.0
-        imagePullPolicy: IfNotPresent
-        args: 
-        - "serve" 
-        - "-config=/etc/cfssl/root_config.json" 
-        - "-ca=/etc/cfssl/ca.pem" 
-        - "-ca-key=/etc/cfssl/ca-key.pem"
-        volumeMounts:
-        - name: keystore-dir
-          mountPath: /etc/cfssl
 
       initContainers:
       - name: init-ca
@@ -109,8 +111,6 @@ spec:
           mountPath: /initca/keystore
 
       # UPDATEME: ensure Shield runs on your master
-      # you can label the master and make it schedulable via these commands:
-      #   kubectl label nodes master-0 shieldrunner=true
-      #   kubectl patch node master-0 -p '{"spec":{"unschedulable":false}}'
+      # you can use `kubectl label` and `kubectl patch` to make a master node schedulable
       nodeSelector:
         shieldrunner: "true"
