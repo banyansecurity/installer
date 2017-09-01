@@ -45,7 +45,7 @@ spec:
         - "--hostOnly" 
         - "--kubelet"
         - "--kubeletAddr=http://localhost:10255"
-        - "shield-ca:1200"
+        - "banyan-shield-ca:1200"
         volumeMounts:
           - name: kernel-debug
             mountPath: /sys/kernel/debug
