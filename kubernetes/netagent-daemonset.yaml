@@ -47,13 +47,13 @@ spec:
         - "--kubeletAddr=http://localhost:10255"
         - "banyan-shield-ca:1200"
         volumeMounts:
-          - name: kernel-debug
-            mountPath: /sys/kernel/debug
-          - name: docker-sock
-            mountPath: /var/run/docker.sock
-          - name: banyan-dir
-            mountPath: /root/.banyan
-            readOnly: false 
+        - name: kernel-debug
+          mountPath: /sys/kernel/debug
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+        - name: banyan-dir
+          mountPath: /root/.banyan
+          readOnly: false 
         env:
         #
         # DNS Service: If your cluster config does not include a dns service, 
@@ -75,7 +75,7 @@ spec:
         command: ["/opt/banyan/on-start.sh"]
         imagePullPolicy: Always
         securityContext:
-            privileged: true
+          privileged: true
         volumeMounts:
         - name: gpg-cidr
           mountPath: /secret
