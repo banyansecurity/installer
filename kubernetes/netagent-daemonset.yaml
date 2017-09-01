@@ -20,6 +20,7 @@ spec:
         hostPath:
           path: /sys/kernel/debug
       - name: banyan-dir
+        # TODO: move to /var/log/banyan      
         hostPath:
           path: /tmp     
       - name: docker-sock
@@ -33,6 +34,11 @@ spec:
       - name: netagent
         image: pub.banyanops.com/k8s-netagent:0.5.0-rc7
         imagePullPolicy: Always
+        # TODO: use K8S nice
+        resources:
+          requests:
+            cpu: 200m
+            memory: 500Mi        
         securityContext:
           privileged: true        
         args:
@@ -49,13 +55,13 @@ spec:
             mountPath: /root/.banyan
             readOnly: false 
         env:
+        #
+        # DNS Service: If your cluster config does not include a dns service, 
+        # set value to `env` to access environment variables to find service host info
+        #          
         - name: GET_HOSTS_FROM
           value: dns
-          # If your cluster config does not include a dns service, then to
-          # instead access environment variables to find service host
-          # info, comment out the 'value: dns' line above, and uncomment the
-          # line below.
-          # value: env
+          # value: env          
         - name: BANYAN_HOST_DIR
           value: /root/.banyan
         lifecycle:
