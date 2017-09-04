@@ -34,11 +34,12 @@ spec:
       - name: netagent
         image: pub.banyanops.com/k8s-netagent:0.5.0-rc7
         imagePullPolicy: Always
-        # TODO: use K8S nice
         resources:
+          limits:
+            memory: 2G          
           requests:
             cpu: 200m
-            memory: 500Mi        
+            memory: 256M
         securityContext:
           privileged: true        
         args:
@@ -55,10 +56,8 @@ spec:
           mountPath: /root/.banyan
           readOnly: false 
         env:
-        #
         # DNS Service: If your cluster config does not include a dns service, 
         # set value to `env` to access environment variables to find service host info
-        #          
         - name: GET_HOSTS_FROM
           value: dns
           # value: env          
