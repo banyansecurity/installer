@@ -16,6 +16,9 @@ spec:
       hostPID: true
       
       volumes:
+      - name: lib-modules
+        hostPath:
+          path: /lib/modules
       - name: kernel-debug
         hostPath:
           path: /sys/kernel/debug
@@ -48,6 +51,9 @@ spec:
         - "--kubeletAddr=http://localhost:10255"
         - "banyan-shield-ca:1200"
         volumeMounts:
+        - name: lib-modules
+          mountPath: /lib/modules
+          readOnly: true
         - name: kernel-debug
           mountPath: /sys/kernel/debug
         - name: docker-sock
@@ -76,6 +82,9 @@ spec:
         securityContext:
           privileged: true
         volumeMounts:
+        - name: lib-modules
+          mountPath: /lib/modules
+          readOnly: true
         - name: gpg-cidr
           mountPath: /secret
           readOnly: true    
