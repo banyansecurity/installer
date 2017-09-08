@@ -41,6 +41,10 @@ spec:
       #    path: /home/vagrant/.kube
       - name: keystore-dir
         emptyDir: {}
+      tolerations:
+      - key: "node-role.kubernetes.io/master"
+        operator: "Exists"
+        effect: "NoSchedule"
 
       containers:
       - name: cfssl
