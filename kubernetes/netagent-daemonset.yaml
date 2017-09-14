@@ -53,6 +53,8 @@ spec:
         - "--hostOnly" 
         - "--kubelet"
         - "--kubeletAddr=http://localhost:10255"
+        - "--disableL7"
+        - "--ignoretraffic=consul"
         - "banyan-shield-ca:1200"
         volumeMounts:
         - name: lib-modules
