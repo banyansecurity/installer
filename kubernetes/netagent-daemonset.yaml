@@ -55,6 +55,8 @@ spec:
         - "--kubeletAddr=http://localhost:10255"
         - "--disableL7"
         - "--ignoretraffic=consul"
+        - "--cloglevel=ERR"
+        - "--floglevel=INFO"
         - "banyan-shield-ca:1200"
         volumeMounts:
         - name: lib-modules
