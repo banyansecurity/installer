@@ -64,7 +64,7 @@ spec:
         - name: keystore-dir
           mountPath: /etc/cfssl        
       - name: shield
-        image: pub.banyanops.com/shield:0.5.0-rc1
+        image: pub.banyanops.com/shield:0.5.0
         imagePullPolicy: Always
         resources:
           limits:

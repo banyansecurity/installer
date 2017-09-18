@@ -39,7 +39,7 @@ spec:
 
       containers:
       - name: netagent
-        image: pub.banyanops.com/k8s-netagent:0.5.0-rc7
+        image: pub.banyanops.com/k8s-netagent:0.5.0
         imagePullPolicy: Always
         resources:
           limits:
