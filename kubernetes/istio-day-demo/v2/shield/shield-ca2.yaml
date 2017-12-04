@@ -1,0 +1,113 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: banyan-shield-ca
+
+spec:
+  type: ClusterIP
+  ports:
+  - port: 1200
+  selector:
+    com.banyanops.agent: shield
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: banyan-shield-ca
+
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        com.banyanops.agent: shield
+        com.banyanops.app: banyan-platform
+    
+    spec:
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+      - name: banyan-dir
+        # TODO: move to /var/log/banyan
+        hostPath:
+          path: /tmp
+      # Kube API 1/3: use if the default InternalAuth method fails to connect to the kube-apiserver
+      # Uncomment and specify the kube config file location on host.
+      - name: kubeconfig-dir
+        hostPath:
+          path: /home/vagrant/.kube
+      - name: keystore-dir
+        emptyDir: {}
+
+      containers:
+      - name: shield
+        image: pub.banyanops.com/shield:incluster
+        imagePullPolicy: Always
+        # TODO: better numbers here
+        resources:
+          requests:
+            cpu: 200m
+            memory: 200Mi
+        env:
+        # DNS Service 1/1: If your cluster config does not include a dns service, 
+        # set value to `env` to access environment variables to find service host info
+        - name: GET_HOSTS_FROM
+          value: dns
+          # value: env
+        - name: BANYAN_HOST_DIR
+          value: /root/.banyan
+        # UPDATEME: ORG_ID's value is a 32-char string available in your Web Dashboard
+        - name: ORG_ID
+          value: 0e87ee28-ae4a-499a-a40a-b7fe5c318ba6 
+        args:
+        - "--banyanURL=https://stage.banyanops.com:443/api_server_host_v1"
+        - "--clustermanager=kubernetes"
+        # Kube API 2/3: use if the default InternalAuth method fails to connect to the kube-apiserver
+        # Specify clustername, exactly as in your kube config file.
+        - "--clustername=tdkube2mgmt"
+        - "--groupType=test"
+        - "--cloglevel=ERR"
+        - "--floglevel=INFO"      
+        ports:
+        - containerPort: 1200
+        volumeMounts:
+        - mountPath: /var/run/docker.sock
+          name: docker-sock
+          readOnly: false
+        - mountPath: /banyandir
+          name: banyan-dir
+          readOnly: false 
+        # Kube API 3/3: use if the default InternalAuth method fails to connect to the kube-apiserver
+        # Uncomment so container can access the kubeconfig-dir
+        - mountPath: /root/.kube
+          name: kubeconfig-dir
+          readOnly: true
+      - name: cfssl
+        image: cfssl/cfssl:1.2.0
+        imagePullPolicy: IfNotPresent
+        args: 
+        - "serve" 
+        - "-config=/etc/cfssl/root_config.json" 
+        - "-ca=/etc/cfssl/ca.pem" 
+        - "-ca-key=/etc/cfssl/ca-key.pem"
+        volumeMounts:
+        - name: keystore-dir
+          mountPath: /etc/cfssl
+
+      initContainers:
+      - name: init-ca
+        image: pub.banyanops.com/banyanops/init-ca
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: keystore-dir
+          mountPath: /initca/keystore
+
+      # UPDATEME: ensure Shield runs on your master
+      # you can label the master and make it schedulable via these commands:
+      #   kubectl label nodes master-0 shieldrunner=true
+      #   kubectl patch node master-0 -p '{"spec":{"unschedulable":false}}'
+      nodeSelector:
+        shieldrunner: "true"

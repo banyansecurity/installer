@@ -1,0 +1,21 @@
+{
+  "kind": "Service",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "apiserverhost",
+    "labels": {
+      "app": "restapiserver"
+    }
+  },
+  "spec": {
+    "ports": [
+      {
+        "port": 9001,
+        "targetPort": 9001
+      }
+    ],
+    "selector": {
+      "app": "restapiserver"
+    }
+  }
+}
