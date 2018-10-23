@@ -2,10 +2,10 @@
 # vi: set ft=ruby :
 
 # Launch a single machine:
-#   vagrant up netagent-ubuntu-14.04
+#   vagrant up ubuntu-14
 #
 # Or, use regex to bring up groups of machines:
-#   vagrant up /netagent-ubuntu.*/
+#   vagrant up /ubuntu.*/
 #
 
 require "yaml"
@@ -24,10 +24,9 @@ Vagrant.configure(2) do |config|
   end
 
   $machines.each do |machine|
-    machine_name = machine["name"]
 
-    config.vm.define machine_name, autostart: false do |host|
-      host.vm.host_name = machine_name
+    config.vm.define machine["name"], autostart: false do |host|
+      host.vm.host_name = machine["name"]
 
       # base images from https://app.vagrantup.com
       host.vm.box = machine["box"]
