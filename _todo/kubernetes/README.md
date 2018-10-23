@@ -23,13 +23,13 @@ pod "busybox" created
 
 $> kubectl exec -it busybox sh
 
-/ # ping net.banyanops.com
+/# ping net.banyanops.com
 PING net.banyanops.com (137.135.42.62): 56 data bytes
 ^C
 --- net.banyanops.com ping statistics ---
 2 packets transmitted, 0 packets received, 100% packet loss
 
-/ # wget net.banyanops.com
+/# wget net.banyanops.com
 Connecting to net.banyanops.com (137.135.42.62:80)
 Connecting to net.banyanops.com (137.135.42.62:443)
 index.html           100% |***************************************************************************************|  7693   0:00:00 ETA
@@ -52,13 +52,13 @@ pod "busybox" created
 
 $> kubectl exec -it busybox sh
 
-/ # ping kubernetes
+/# ping kubernetes
 PING kubernetes (10.233.0.1): 56 data bytes
 ^C
 --- kubernetes ping statistics ---
 2 packets transmitted, 0 packets received, 100% packet loss
 
-/ # wget https://kubernetes:443
+/# wget https://kubernetes:443
 Connecting to kubernetes:443 (10.233.0.1:443)
 wget: TLS error from peer (alert code 40): handshake failure
 wget: error getting response: Connection reset by peer
