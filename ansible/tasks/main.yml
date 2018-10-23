@@ -1,0 +1,84 @@
+---
+- set_fact:
+    installer_dir: "/usr/local/banyan"
+    download_url: "https://www.banyanops.com/netting" 
+    netagent_tarball: "netagent-{{ install_version }}.tar.gz"
+- set_fact: netagent_folder="{{ installer_dir }}/netagent-{{ install_version }}"
+- set_fact: netagent_config="{{ netagent_folder }}/config-netagent"
+- set_fact: netagent_services="{{ netagent_folder }}/services.json"
+- set_fact: netagent_cidrs="{{ netagent_folder }}/cidrs.txt"
+- set_fact: netagent_setup="{{ netagent_folder }}/setup-netagent.sh"
+
+- file: state="directory" path="{{ installer_dir }}"
+
+- name: Download Netagent tarball from {{ download_url }}
+  get_url:
+    url: "{{ download_url }}/{{ netagent_tarball }}"
+    dest: "{{ installer_dir }}/{{ netagent_tarball }}"
+
+- name: Extract Netagent tarball from to {{ netagent_tarball }}
+  unarchive:
+    src: "{{ installer_dir }}/{{ netagent_tarball }}"
+    dest: "{{ installer_dir }}"
+    remote_src: yes
+
+- name: Create config file {{ netagent_config }}
+  copy:
+    src: "{{ netagent_config }}.tpl"
+    dest: "{{ netagent_config }}"
+    remote_src: yes
+
+- name: Update config file {{ netagent_config }}
+  ini_file:
+    path: "{{ netagent_config }}"
+    section: null
+    no_extra_spaces: yes
+    option: shield_addr
+    value: "{{ shield_addr }}"
+- ini_file:
+    path: "{{ netagent_config }}"
+    section: null
+    no_extra_spaces: yes
+    option: gpg_password
+    value: "{{ gpg_password }}"
+- ini_file:
+    path: "{{ netagent_config }}"
+    section: null
+    no_extra_spaces: yes
+    option: one_time_key
+    value: "{{ one_time_key }}"
+- ini_file:
+    path: "{{ netagent_config }}"
+    section: null
+    no_extra_spaces: yes
+    option: netagent_tags
+    value: "{{ netagent_tags }}"
+- ini_file:
+    path: "{{ netagent_config }}"
+    section: null
+    no_extra_spaces: yes
+    option: services_from_file
+    value: "true"
+  when: services_file
+- ini_file:
+    path: "{{ netagent_config }}"
+    section: null
+    no_extra_spaces: yes
+    option: visibility_only
+    value: "false"
+  when: cidrs_file
+
+- name: Copying over services file to {{ netagent_services }}
+  copy:
+    src: services.json
+    dest: "{{ netagent_services }}"
+  when: services_file
+
+- name: Copying over services file to {{ netagent_cidrs }}
+  copy:
+    src: cidrs.txt
+    dest: "{{ netagent_cidrs }}"
+  when: cidrs_file
+
+- name: Running netagent setup script {{ netagent_setup }}
+  command: "{{ netagent_setup }}"
