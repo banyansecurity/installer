@@ -1,0 +1,56 @@
+[
+  {
+    "kind":"BanyanService",
+    "apiVersion":"rbac.banyanops.com/v1",
+    "type":"attribute",
+    "metadata":{
+      "name":"ExampleService1",
+      "description":"Defined based on the provided array of addresses. Each address can include an IP address or CIDR range and it can include a TCP port number, or a comma-separated list of TCP port numbers. Both the IP/CIDR and port are optional, but you have to specify at least one of them."
+    },
+    "spec":{
+      "addresses": [
+        "10.20.30.0/24:8080",
+        "10.20.40.244"
+      ]
+    }
+  },
+  {
+    "kind":"BanyanService",
+    "apiVersion":"rbac.banyanops.com/v1",
+    "type":"attribute",
+    "metadata":{
+      "name":"ExampleService2",
+      "description":"Any process on the host that accepts traffic on port :9092 will be considered to be ExampleService2."
+    },
+    "spec":{
+      "addresses": [
+        ":9092"
+      ]
+    }
+  },
+  {
+    "kind":"BanyanService",
+    "apiVersion":"rbac.banyanops.com/v1",
+    "type":"attribute-based",
+    "metadata":{
+      "name":"ExampleService3",
+      "description":"Service with HTTPS health check"
+    },
+    "spec":{
+      "addresses": [
+        "10.20.30.0/24:443"
+      ],
+      "extensions": {
+        "http_health_check":{
+          "method": "GET",
+          "path": "/health.html",
+          "user_agent": "ELB-HealthChecker/2.0",
+          "from_address": [
+            "10.20.30.0/24"
+          ],
+          "https": true 
+        }
+      }
+    }
+  }
+]

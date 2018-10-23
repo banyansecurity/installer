@@ -1,0 +1,7 @@
+# use CIDRs to intercept traffic
+
+# service runs on port 8080 on IP 52.165.0.4
+52.165.0.4 --dport 8080
+
+# service runs on port 6667 on the IPs 10.31.48.0 - 10.31.48.255
+10.31.48.0/24 --dport 6667
