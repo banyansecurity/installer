@@ -1,0 +1,8 @@
+# vagrant
+.vagrant
+
+# downloaded tarballs
+netagent-0*
+
+# ansible
+*.retry
