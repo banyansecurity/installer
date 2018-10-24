@@ -11,7 +11,7 @@
 require "yaml"
 $machines = YAML.load_file(File.dirname(__FILE__) + "/machines.yml")
 
-$provisioner = ENV["PROVISIONER"] || "python"
+$provisioner = ENV["PROVISIONER"] || "ansible"
 
 MEMORY=512
 NUM_CPUS=1
@@ -35,15 +35,15 @@ Vagrant.configure(2) do |config|
       # vagrant automatically shares the host git repo folder at /vagrant
       # host.vm.synced_folder ".", "/vagrant"
 
-      if $provisioner == "ansible"
+      if $provisioner == "python"
+        host.vm.provision "shell" do |shell|
+          shell.inline = "sudo /usr/bin/python /vagrant/python/netagent.py"
+        end
+      else  # default is ansible
         host.vm.provision "ansible" do |ansible|
           ansible.compatibility_mode = "2.0"
           ansible.playbook = "ansible-playbook-example/playbook.yml"
           ansible.become = true
-        end
-      else  # default is python
-        host.vm.provision "shell" do |shell|
-          shell.inline = "sudo /usr/bin/python /vagrant/python/netagent.py"
         end
       end
 
