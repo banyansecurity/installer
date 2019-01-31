@@ -1,8 +1,8 @@
-# Netagent Install
+# Ansible Install
 
-## Ansible
+A convenient and scalable way to deploy netagent. 
 
-The orchestration tool Ansible provides a convenient way to deploy netagent.
+## Overview
 
 myhost_inventory:
 ```
@@ -40,4 +40,6 @@ netagent_playbook.yml
 
 Deploy netagent to all hosts listed in `myhost_inventory` with single command:
 
-`./ansible-playbook -i myhost_inventory netagent_playbook.yml`
+```
+./ansible-playbook -i myhost_inventory netagent_playbook.yml
+```
