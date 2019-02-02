@@ -10,5 +10,5 @@ Deploy with Ansible:
 ```
 vagrant up
 cd ./ansible
-./ansible-playbook -i ./vagrant_inventory ./netagent_playbook.yml
+ansible-playbook -i ./vagrant_inventory ./netagent_playbook.yml
 ```

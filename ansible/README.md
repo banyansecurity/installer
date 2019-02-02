@@ -41,5 +41,5 @@ netagent_playbook.yml
 Deploy netagent to all hosts listed in `myhost_inventory` with single command:
 
 ```
-./ansible-playbook -i myhost_inventory netagent_playbook.yml
+ansible-playbook -i myhost_inventory netagent_playbook.yml
 ```

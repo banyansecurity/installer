@@ -1,3 +1,8 @@
+[all:vars]
+cluster_name=cluster1
+refresh_token=<refresh token copied from banyan console>
+netagent_tags="ostype=linux"
+
 [myhosts]
 localhost:2222
 
@@ -5,6 +10,6 @@ localhost:2222
 ansible_user=vagrant
 ansible_ssh_private_key_file=../.vagrant/machines/default/virtualbox/private_key
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-cluster_name=cluster1
-refresh_token=<refresh token copied from banyan console>
+netagent_tags_extra="type=myhosts"
+
 
