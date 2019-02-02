@@ -1,8 +1,0 @@
----
-- name: Install Netagent on hosts
-  hosts: all
-  any_errors_fatal: true
-  become: yes
-  become_user: root
-  roles:
-    - { role: netagent }  

@@ -1,13 +1,14 @@
-# Banyan Installer
+# Installer
 
-## Netagent v0.7
+This repo provides tools and instruction for deploying banyan
 
-### Working
-- Ansible
-- Python
+To use the examples in this repo you will need `Ansible`, `Vagrant` and a Virtual Machine provider such as `Fusion`, `Workstation` or `VirtualBox` installed on your local system.
 
-### In Progress (see **_todo** folder)
-- Puppet
-- Chef
-- Kubernetes (Daemon Set)
-- Docker
+## Examples
+
+Deploy with Ansible:
+```
+vagrant up
+cd ./ansible
+./ansible-playbook -i ./vagrant_inventory ./netagent_playbook.yml
+```
