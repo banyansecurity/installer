@@ -17,6 +17,8 @@
         name: https://s3-us-west-2.amazonaws.com/www.banyanops.com/onramp/rpm/banyan-netagent-0.7.1-rc11.x86_64.rpm
         state: present
     - name: Copy config-netagent.tpl
-      template: src=config-netagent.tpl.j2 dest=/opt/banyan-packages/config-netagent.tpl
+      template:
+        src: ./templates/config-netagent.tpl.j2
+        dest: /opt/banyan-packages/config-netagent.tpl
     - name: Run RPM post-install, install script
       shell: /opt/banyan-packages/install '{{refresh_token}}' {{cluster_name}}
