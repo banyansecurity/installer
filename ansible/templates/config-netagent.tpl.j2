@@ -1,7 +1,7 @@
 # Banyan Netagent configuration
 
 # Shield address as IP_ADDR:PORT
-shield_addr=127.0.0.1:1200
+shield_addr=REPLACE
 
 # GPG password (available from Banyan)
 gpg_password=REPLACE
@@ -13,7 +13,7 @@ one_time_key=REPLACE_OR_DELETE
 netagent_tags="{{netagent_tags}},{{netagent_tags_extra}}"
 
 # Visibility mode (ignore CIDRs, roles, policies)
-visibility_only=true
+visibility_only=false
 
 # Listen port on localhost (default=9999)
 listen_port=9999
@@ -38,7 +38,7 @@ nice_level=10
 open_files=65536
 
 # [Optional] Traffic to ignore (comma-separated list of names, e.g., "consul,etcd")
-ignore_traffic=consul,etcd,haproxy
+ignore_traffic=
 
 # [Optional] Specify local services from a file
 services_from_file=false
