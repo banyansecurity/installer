@@ -4,17 +4,23 @@
   become_user: root
   become_method: sudo
   tasks:
-    - name: Enable EPEL Repo
+    # https://aws.amazon.com/premiumsupport/knowledge-center/ec2-enable-epel/
+    - name: Enable EPEL Repo for CentOS 6 and 7
       package:
         name: epel-release
         state: present
-    - name: Install Banyan
+      when: ansible_distribution == 'CentOS'
+    - name: Enable EPEL Repo for Amazon Linux 2
       package:
-        name: https://s3-us-west-2.amazonaws.com/www.banyanops.com/onramp/rpm/banyan-netagent-0.7.1-rc21.x86_64.rpm
+        name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
         state: present
+      when: ansible_distribution == "Amazon"
+    - name: Install banyan-netagent
+      package:
+        name: https://www.banyanops.com/onramp/rpm/banyan-netagent-{{netagent_version}}.x86_64.rpm
     - name: Copy config
       template:
         src: ./templates/config.yaml.tpl.j2
         dest: /opt/banyan-packages/config.yaml.tpl
-    - name: Run RPM post-install, install script
+    - name: Run post-install script
       shell: /opt/banyan-packages/install '{{refresh_token}}' {{cluster_name}}
