@@ -3,23 +3,17 @@
   become: yes
   become_user: root
   become_method: sudo
-  tasks:
-    # https://aws.amazon.com/premiumsupport/knowledge-center/ec2-enable-epel/
-    - name: Enable EPEL Repo for CentOS 6 and 7
+  tasks:    
+    - name: Install curl
       yum:
-        name: epel-release
+        name: curl
         state: present
-      when: ansible_distribution == 'CentOS'
-    - name: Enable EPEL Repo for Amazon Linux 2
-      yum:
-        name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-        state: present
-      when: ansible_distribution == "Amazon"      
-    - name: Install dependencies
-      yum:
-        name: jq
-        state: present
-    - name: Install RPM
+    - name: Download jq
+      get_url:
+        url: https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+        dest: /usr/bin/jq
+        mode: 0755       
+    - name: Install Netagent RPM
       yum: 
         name: https://www.banyanops.com/onramp/rpm/banyan-netagent-{{netagent_version}}.x86_64.rpm
         state: present
@@ -29,3 +23,5 @@
         dest: /opt/banyan-packages/config-netagent.tpl
     - name: Run RPM post-install, install script
       shell: /opt/banyan-packages/install '{{refresh_token}}' {{cluster_name}}
+      environment:
+        BANYAN_API: "{{api_server}}"
