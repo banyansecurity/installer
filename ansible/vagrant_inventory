@@ -1,7 +1,7 @@
 [all:vars]
 cluster_name=cluster1
 refresh_token=<refresh token copied from banyan console>
-netagent_tags="ostype=linux"
+netagent_tags="{ ostype: linux, host: test }"
 
 [myhosts]
 localhost:2222

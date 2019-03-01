@@ -5,20 +5,16 @@
   become_method: sudo
   tasks:
     - name: Enable EPEL Repo
-      yum:
+      package:
         name: epel-release
         state: present
-    - name: Install dependencies
-      yum:
-        name: jq
+    - name: Install Banyan
+      package:
+        name: https://s3-us-west-2.amazonaws.com/www.banyanops.com/onramp/rpm/banyan-netagent-0.7.1-rc21.x86_64.rpm
         state: present
-    - name: Install RPM
-      yum: 
-        name: https://s3-us-west-2.amazonaws.com/www.banyanops.com/onramp/rpm/banyan-netagent-0.7.1-rc11.x86_64.rpm
-        state: present
-    - name: Copy config-netagent.tpl
+    - name: Copy config
       template:
-        src: ./templates/config-netagent.tpl.j2
-        dest: /opt/banyan-packages/config-netagent.tpl
+        src: ./templates/config.yaml.tpl.j2
+        dest: /opt/banyan-packages/config.yaml.tpl
     - name: Run RPM post-install, install script
       shell: /opt/banyan-packages/install '{{refresh_token}}' {{cluster_name}}
