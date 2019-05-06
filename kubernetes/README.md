@@ -16,10 +16,11 @@ Currently, the Banyan Netagent is supported on the following Linux distros when 
 cp config.yaml.tpl config.yaml
 ```
 Set these properties in config.yaml
- - shield_address
- - secure_bootstrap
- - one_time_key
- - visibility_only
+
+- shield_address
+- secure_bootstrap
+- one_time_key
+- visibility_only
 
 ###Create daemonset
 ```
