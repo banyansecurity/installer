@@ -1,0 +1,15 @@
+[all:vars]
+package_name=netagent-0.7.1.tar.gz
+cluster_name=cluster1
+refresh_token=<refresh token>
+
+[myhosts]
+localhost:2222
+
+[myhosts:vars]
+ansible_user=vagrant
+ansible_ssh_private_key_file=../../.vagrant/machines/default/virtualbox/private_key
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+netagent_tags="{ group: myhosts, owner: alice }"
+
+

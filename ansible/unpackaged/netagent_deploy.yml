@@ -1,0 +1,49 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Download package to localhost
+      delegate_to: localhost
+      shell: "test -e ./{{package_name}} || curl -O https://www.banyanops.com/netting/{{package_name}}"
+      register: download_result
+      changed_when: download_result.stdout != ""
+- hosts: all
+  become: yes
+  gather_facts: no
+  pre_tasks:
+    - name: Install python for Ansible
+      raw: "test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)"
+      register: output
+      changed_when: output.stdout != ""
+  tasks:
+    - name: Create banyan-packages
+      file:
+        name: /opt/banyan-packages
+        state: directory
+    - name: Install jq utility
+      copy:
+        src: bin/jq-1.5/jq-linux64
+        dest: /usr/bin/jq
+        mode: 0755
+    - name: Install configure-netagent
+      copy:
+        src: bin/configure-netagent
+        dest: /opt/banyan-packages/configure-netagent
+        mode: 0755
+    - name: Copy package
+      copy:
+        src: "./{{package_name}}"
+        dest: "/opt/banyan-packages/{{package_name}}"
+    - name: Copy install script
+      copy:
+        src: bin/install
+        dest: /opt/banyan-packages/install
+        mode: 0755
+    - name: Copy config
+      template:
+        src: ./templates/config.yaml.tpl.j2
+        dest: /opt/banyan-packages/config.yaml.tpl
+    - name: Generate packages.env
+      shell: "echo 'NETAGENT_PACKAGE={{package_name}}' > /opt/banyan-packages/packages.env"
+    - name: Run post-install script
+      shell: /opt/banyan-packages/install '{{refresh_token}}' {{cluster_name}}

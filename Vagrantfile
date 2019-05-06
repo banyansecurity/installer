@@ -1,5 +1,5 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 Vagrant.configure("2") do |config|
-  config.vm.box = "gbailey/amzn2"
+  config.vm.box = "ubuntu/xenial64"
 end

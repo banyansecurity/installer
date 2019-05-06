@@ -1,0 +1,49 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: no
+  pre_tasks:
+    - name: Install python for Ansible
+      raw: "test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)"
+      register: output
+      changed_when: output.stdout != ""
+    - setup:
+  tasks:
+    - group_by:
+        key: os_{{ansible_distribution}}
+- hosts: os_CentOS:os_RedHat:os_Amazon
+  become: yes
+  tasks:
+    - name: Add yum repo for centos
+      yum_repository:
+        name: banyan-stage
+        description: banyan stage repo
+        baseurl: https://www-stage.bnntest.com/onramp/repo/
+        gpgcheck: no
+- hosts: os_Ubuntu:os_Debian
+  become: yes
+  tasks:
+    - name: Add apt repo for ubuntu
+      apt_repository:
+        repo: "deb [trusted=yes] http://www-stage.bnntest.com/onramp/repo xenial main"
+        state: present
+- hosts: all
+  become: yes
+  tasks:
+    - name: Install jq utility
+      copy:
+        src: bin/jq-1.5/jq-linux64
+        dest: /usr/bin/jq
+        mode: 0755
+    - name: Install packages
+      package:
+        name:
+          - curl
+          - banyan-netagent
+        state: present
+    - name: Copy config
+      template:
+        src: ./templates/config.yaml.tpl.j2
+        dest: /opt/banyan-packages/config.yaml.tpl
+    - name: Run post-install script
+      shell: /opt/banyan-packages/install '{{refresh_token}}' {{cluster_name}}
