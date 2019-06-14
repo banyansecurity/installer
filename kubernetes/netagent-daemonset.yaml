@@ -24,6 +24,8 @@ spec:
               - name: etc
                 mountPath: /etc
                 readOnly: true
+              - name: lib-modules
+                mountPath: /lib/modules
               - name: kernel-debug
                 mountPath: /sys/kernel/debug
               - name: dockersock
@@ -35,7 +37,7 @@ spec:
                 mountPath: /secret
                 readOnly: true
             env:
-              - name: NETAGENT_CONFIG
+              - name: CONFIG_SOURCE
                 value: /secret/config.yaml
               - name: GET_HOSTS_FROM
                 value: dns
@@ -59,6 +61,8 @@ spec:
           securityContext:
               privileged: true
           volumeMounts:
+          - name: lib-modules
+            mountPath: /lib/modules
           - name: netagent-config
             mountPath: /secret
             readOnly: true
@@ -66,6 +70,9 @@ spec:
           - name: etc
             hostPath:
               path: /etc
+          - name: lib-modules
+            hostPath:
+              path: /lib/modules
           - name: kernel-debug
             hostPath:
               path: /sys/kernel/debug
