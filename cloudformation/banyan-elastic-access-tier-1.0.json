@@ -1,0 +1,324 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Banyan Elastic Access Tier",
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups" : [
+        {
+          "Label": { "default" : "Network Configuration" },
+          "Parameters": [ "VPCID", "PublicSubnets", "PrivateSubnets", "SSHKeyName", "ManagementCidr", "HealthCheckCidr", "AmiId"]
+        },
+        {
+          "Label": { "default": "Banyan Configuration" },
+          "Parameters": [ "BanyanClusterName", "BanyanRefreshToken", "BanyanSiteDomainNames", "BanyanApiServer", "BanyanPackage", "BanyanHostTags" ]
+        }
+      ],
+      "ParameterLabels": {
+        "VPCID": { "default" : "Which VPC should this be deployed to?" }
+      }
+    }
+  },
+  "Parameters": {
+    "VPCID": {
+      "Description": "VPC must have internet access through an Internet Gateway",
+      "Type": "AWS::EC2::VPC::Id"
+    },
+    "PublicSubnets": {
+      "Default": "",
+      "Description": "Public subnets for the load balancer.",
+      "Type": "List<AWS::EC2::Subnet::Id>"
+    },
+    "PrivateSubnets": {
+      "Default": "",
+      "Description": "Private subnets for the instances.",
+      "Type": "List<AWS::EC2::Subnet::Id>"
+    },
+    "BanyanClusterName": {
+      "Description": "Name of the cluster to join",
+      "AllowedPattern": "^[A-Za-z0-9_-]+",
+      "Type": "String",
+      "Default": "cluster1"
+    },
+    "BanyanRefreshToken": {
+      "Description": "Create a Refresh Token in the 'My Profile' section of the Banyan console",
+      "Type": "String",
+      "AllowedPattern": "^[A-Za-z0-9._-]+",
+      "MinLength": 200
+    },
+    "BanyanSiteDomainNames": {
+      "Default": "*.trusted.example.com",
+      "Description": "Alias or CNAME(s) that route traffic to this access tier. Separate multiple values with a comma.",
+      "Type": "String"
+    },
+    "BanyanApiServer": {
+      "Description": "API Server",
+      "Type": "String",
+      "Default": "https://net.banyanops.com/api/v1",
+      "AllowedPattern": "^https://[^\\s]+"
+    },
+    "BanyanPackage": {
+      "Description": "Package name",
+      "Type": "String",
+      "Default": "https://www.banyanops.com/onramp/rpm/banyan-netagent-0.7.5-1.el7.x86_64.rpm",
+      "AllowedPattern": "^https://[A-Za-z0-9._/-]+"
+    },
+    "BanyanHostTags": {
+      "Description": "(optional) key=value, comma separated host tag pairs",
+      "Type": "String",
+      "Default": "type=access_tier",
+      "AllowedPattern": "^([A-Za-z0-9_/-]+=[A-Za-z0-9_/-]*,?)*[^,]$"
+    },
+    "SSHKeyName": {
+      "Description": "Enables access to instances via SSH",
+      "Type": "AWS::EC2::KeyPair::KeyName"
+    },
+    "HealthCheckCidr": {
+      "Description": "Allow NLB HealthCheck from specified CIDR range",
+      "Type": "String",
+      "Default": "0.0.0.0/0"
+    },
+    "ManagementCidr": {
+      "Description": "Allow SSH from specified CIDR range",
+      "Type": "String",
+      "Default": "0.0.0.0/0"
+    },
+    "AmiId": {
+      "Type":  "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+      "Default": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+    }
+  },
+  "Resources": {
+    "BanyanSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Elastic Access Tier ingress traffic",
+        "VpcId": {"Ref": "VPCID"},
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "FromPort": 22,
+            "ToPort": 22
+          },
+          {
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "FromPort": 443,
+            "ToPort": 443
+          },
+          {
+            "IpProtocol": "tcp",
+            "CidrIp": {"Ref": "HealthCheckCidr"},
+            "FromPort": 9998,
+            "ToPort": 9998
+          },
+          {
+            "IpProtocol": "tcp",
+            "CidrIp": {"Ref":  "ManagementCidr"},
+            "FromPort": 2222,
+            "ToPort": 2222
+          }
+        ]
+      }
+    },
+    "BanyanNLB": {
+      "Type" : "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "Type": "network",
+        "IpAddressType": "ipv4",
+        "Scheme": "internet-facing",
+        "Subnets": {"Ref": "PublicSubnets"}
+      }
+    },
+    "Listener443": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {"Ref": "BanyanTargetGroup443"}
+          }
+        ],
+        "LoadBalancerArn": {"Ref": "BanyanNLB"},
+        "Port": 443,
+        "Protocol": "TCP"
+      }
+    },
+    "Listener22": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {"Ref": "BanyanTargetGroup22"}
+          }
+        ],
+        "LoadBalancerArn": {"Ref": "BanyanNLB"},
+        "Port": 22,
+        "Protocol": "TCP"
+      }
+    },
+    "BanyanLaunchConfig": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "Properties": {
+        "KeyName": {
+          "Ref": "SSHKeyName"
+        },
+        "ImageId": {"Ref": "AmiId"},
+        "SecurityGroups": [
+          {"Ref": "BanyanSecurityGroup"}
+        ],
+        "InstanceType": "t2.micro",
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sdc",
+            "VirtualName": "ephemeral0"
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash -x\n",
+                "yum update -y && yum install -y aws-cfn-bootstrap jq\n",
+                "/opt/aws/bin/cfn-init -v ",
+                "--resource BanyanLaunchConfig ",
+                "--configsets default ",
+                "--stack ",
+                {"Ref": "AWS::StackName"},
+                " ",
+                "--region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\n",
+                "curl -O ",
+                {"Ref": "BanyanPackage"},
+                "\n",
+                "yum -y --nogpgcheck install ",
+                {"Ref": "BanyanPackage"},
+                "\n",
+                "cd /opt/banyan-packages\n",
+                "BANYAN_ACCESS_TIER=true",
+                " ",
+                "BANYAN_SITE_NAME=", {"Ref": "AWS::StackName"},
+                " ",
+                "BANYAN_SITE_ADDRESS=", { "Fn::GetAtt" : [ "BanyanNLB", "DNSName" ]},
+                " ",
+                "BANYAN_SITE_DOMAIN_NAMES=", {"Ref": "BanyanSiteDomainNames"},
+                " ",
+                "BANYAN_SITE_AUTOSCALE=true",
+                " ",
+                "BANYAN_API=", {"Ref": "BanyanApiServer"},
+                " ",
+                "BANYAN_HOST_TAGS=", {"Ref":  "BanyanHostTags"},
+                " ",
+                "./install ",
+                {"Ref": "BanyanRefreshToken"},
+                " ",
+                {"Ref": "BanyanClusterName"},
+                "\n",
+                "echo 'Port 2222' >> /etc/ssh/sshd_config && /bin/systemctl restart sshd.service\n",
+                "/opt/aws/bin/cfn-signal -e $? ",
+                "--resource BanyanASG ",
+                "--stack ",
+                {"Ref": "AWS::StackName"},
+                " ",
+                "--region ",
+                {"Ref": "AWS::Region"},
+                "\n"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "BanyanTargetGroup443": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckPort": "9998",
+        "HealthCheckIntervalSeconds": "30",
+        "HealthyThresholdCount": "2",
+        "UnhealthyThresholdCount": "2",
+        "Port": 443,
+        "Protocol": "TCP",
+        "VpcId": {
+          "Ref": "VPCID"
+        }
+      }
+    },
+    "BanyanTargetGroup22": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckPort": "9998",
+        "HealthCheckIntervalSeconds": "30",
+        "HealthyThresholdCount": "2",
+        "UnhealthyThresholdCount": "2",
+        "Port": 22,
+        "Protocol": "TCP",
+        "VpcId": {
+          "Ref": "VPCID"
+        }
+      }
+    },
+    "BanyanASG": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "LaunchConfigurationName": {
+          "Ref": "BanyanLaunchConfig"
+        },
+        "DesiredCapacity": 2,
+        "MinSize": 1,
+        "MaxSize": 2,
+        "VPCZoneIdentifier": {
+          "Ref": "PrivateSubnets"
+        },
+        "HealthCheckGracePeriod": "300",
+        "HealthCheckType": "ELB",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {"Ref": "AWS::StackName"},
+                  "BanyanHost"
+                ]
+              ]
+            },
+            "PropagateAtLaunch": "true"
+          },
+          {
+            "Key": "Network",
+            "Value": "Public",
+            "PropagateAtLaunch": "true"
+          },
+          {
+            "Key": "Provider",
+            "Value": "BanyanOps",
+            "PropagateAtLaunch": "true"
+          }
+        ],
+        "TargetGroupARNs": [
+          {"Ref": "BanyanTargetGroup443"},
+          {"Ref": "BanyanTargetGroup22"}
+        ]
+      },
+      "CreationPolicy": {
+        "ResourceSignal": {
+          "Count": "1",
+          "Timeout": "PT5M"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "LoadBalancer" : {
+      "Value": { "Fn::GetAtt" : [ "BanyanNLB", "DNSName" ]}
+    }
+  }
+}
