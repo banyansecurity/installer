@@ -1,28 +1,35 @@
-# Deploy using repo package
+# Installer - Netagent - Ansible - Deploy using DEB/RPM package
 
-A convenient and scalable way to deploy the banyan netagent with Ansible.
+This deployment method provides a convenient and scalable way to deploy the Banyan Netagent using DEB/RPM repo packages for your Linux operating system.
 
-###Pre-requisites (command host)
+---
+
+### Pre-requisites (on Command Host)
+
 * Ansible 2.7
 * Curl 
 
-###Step 1
-Create an inventory file. 
 
-example_inventory
+### Step 1 - Inventory and Configuration
+
+Create an inventory file and specify cluster configuration using inventory variables. Your `refresh_token` and your org clusters' `cluster_name` are available via the Banyan Web Console.
+
+Example inventory `my_inventory`:
 ```
+[all:vars]
+cluster_name=cluster1
+refresh_token=<refresh token copied from banyan console>
+
 [group1]
 host1.example.com
 host2.example.com
-
-[group1:vars]
-cluster_name=cluster1
-refresh_token=<refresh token copied from banyan console>
 ```
 
-###Step 2 
-Deploy netagent to all inventory hosts using a single command
+
+### Step 2 - Deploy Netagent to all inventory hosts
+
+The latest Netagent version will get installed on all inventory hosts.
 
 ```
-ansible-playbook -i example_inventory netagent_playbook.yml
+ansible-playbook -i my_inventory netagent_playbook.yml
 ```
