@@ -14,16 +14,21 @@
 - hosts: os_CentOS:os_RedHat:os_Amazon
   become: yes
   tasks:
-    - name: Add yum repo for centos
+    - name: Add Banyan public key
+      rpm_key:
+        state: present
+        key: https://www.banyanops.com/onramp/repo/RPM-GPG-KEY-banyan
+    - name: Add banyan repo
       yum_repository:
         name: banyan-stage
         description: banyan stage repo
-        baseurl: https://www-stage.bnntest.com/onramp/repo/
-        gpgcheck: no
+        baseurl: https://www.banyanops.com/onramp/repo/
+        gpgcheck: true
+        gpgkey: https://www.banyanops.com/onramp/repo/RPM-GPG-KEY-banyan
 - hosts: os_Ubuntu:os_Debian
   become: yes
   tasks:
-    - name: Add apt repo for ubuntu
+    - name: Add banyan repo
       apt_repository:
         repo: "deb [trusted=yes] http://www-stage.bnntest.com/onramp/repo xenial main"
         state: present
