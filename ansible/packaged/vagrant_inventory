@@ -1,7 +1,7 @@
 [all:vars]
-netagent_version=0.7.1-rc25
-cluster_name=cluster1
-refresh_token=<refresh token>
+netagent_version=0.7.5
+cluster_name=<your cluster>
+refresh_token=<your refresh token>
 netagent_tags="{ os: linux }"
 
 [myhosts]
@@ -9,7 +9,7 @@ localhost:2222
 
 [myhosts:vars]
 ansible_user=vagrant
-ansible_ssh_private_key_file=../../.vagrant/machines/default/virtualbox/private_key
+ansible_ssh_private_key_file=./.vagrant/machines/default/virtualbox/private_key
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 netagent_tags="{ group: myhosts, owner: alice }"
 
