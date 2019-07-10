@@ -20,17 +20,19 @@
         key: https://www.banyanops.com/onramp/repo/RPM-GPG-KEY-banyan
     - name: Add banyan repo
       yum_repository:
-        name: banyan-stage
-        description: banyan stage repo
+        name: banyan-prod
+        description: banyan prod repo
         baseurl: https://www.banyanops.com/onramp/repo/
         gpgcheck: true
         gpgkey: https://www.banyanops.com/onramp/repo/RPM-GPG-KEY-banyan
 - hosts: os_Ubuntu:os_Debian
   become: yes
   tasks:
+    - debug:
+        msg: "Note: Ubuntu/Debian support is WIP! Package signing and support for more distros coming soon."
     - name: Add banyan repo
       apt_repository:
-        repo: "deb [trusted=yes] http://www-stage.bnntest.com/onramp/repo xenial main"
+        repo: "deb [trusted=yes] http://www.banyanops.com/onramp/repo xenial main"
         state: present
 - hosts: all
   become: yes
