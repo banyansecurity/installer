@@ -1,5 +1,7 @@
 ---
 - hosts: localhost
+  vars:
+    package_name: 'netagent-{{netagent_version}}.tar.gz'
   gather_facts: no
   tasks:
     - name: Download package to localhost
@@ -8,6 +10,8 @@
       register: download_result
       changed_when: download_result.stdout != ""
 - hosts: all
+  vars:
+    package_name: 'netagent-{{netagent_version}}.tar.gz'
   become: yes
   gather_facts: no
   pre_tasks:
