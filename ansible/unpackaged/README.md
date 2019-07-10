@@ -46,13 +46,13 @@ ansible-playbook -i my_inventory netagent_deploy.yml
 
 A quick option to try Netagent deployment on your local machine is to use Vagrant. You will need `Ansible`, `Vagrant` and a Virtual Machine provider (such as `Fusion`, `Workstation` or `VirtualBox`) installed on your local system.
 
-First, make sure you update the `vagrant_inventory` variables including `package_name`, `cluster_name` and `refresh_token`.**
+First, make sure you update the `vagrant_inventory` variables including `netagent_version`, `cluster_name` and `refresh_token`.**
 
 The commands below will bring up a VM and deploy netagent. 
 
 ```
 vagrant up
-ansible-playbook -i vagrant_inventory netagent_deploy.yml
+ansible-playbook -i vagrant_inventory netagent_playbook.yml
 ```
   
 
