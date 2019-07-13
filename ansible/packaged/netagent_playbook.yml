@@ -28,11 +28,13 @@
 - hosts: os_Ubuntu:os_Debian
   become: yes
   tasks:
-    - debug:
-        msg: "Note: Ubuntu/Debian support is WIP! Package signing and support for more distros coming soon."
+    - name: Add banyan public signing key
+      apt_key:
+        url: https://www.banyanops.com/onramp/deb-repo/banyan.key
+        state: present
     - name: Add banyan repo
       apt_repository:
-        repo: "deb [trusted=yes] http://www.banyanops.com/onramp/repo xenial main"
+        repo: "deb http://www.banyanops.com/onramp/deb-repo xenial main"
         state: present
 - hosts: all
   become: yes
@@ -54,5 +56,5 @@
         dest: /opt/banyan-packages/config.yaml.tpl
     - name: Run post-install script
       shell: /opt/banyan-packages/install '{{refresh_token}}' {{cluster_name}}
-#      environment: 
+#      environment:
 #        BANYAN_API: '{{banyan_api}}'
