@@ -59,7 +59,7 @@
     "BanyanPackage": {
       "Description": "Package name",
       "Type": "String",
-      "Default": "https://www.banyanops.com/onramp/rpm/banyan-netagent-0.7.5-1.el7.x86_64.rpm",
+      "Default": "https://s3-us-west-2.amazonaws.com/www.banyanops.com/onramp/repo/RPMS/x86_64/banyan-netagent-0.7.7-1.el7.x86_64.rpm",
       "AllowedPattern": "^https://[A-Za-z0-9._/-]+"
     },
     "BanyanHostTags": {
