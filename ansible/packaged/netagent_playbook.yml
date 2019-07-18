@@ -4,7 +4,7 @@
   gather_facts: no
   pre_tasks:
     - name: Install python for Ansible
-      raw: "test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)"
+      raw: "command -v python > /dev/null || (apt -y update && apt install -y python3) || yum -y install python"
       register: output
       changed_when: output.stdout != ""
     - setup:
@@ -25,36 +25,44 @@
         baseurl: https://www.banyanops.com/onramp/repo/
         gpgcheck: true
         gpgkey: https://www.banyanops.com/onramp/repo/RPM-GPG-KEY-banyan
+- hosts: os_CentOS
+  become: yes
+  tasks:
+    - name: Enable EPEL
+      package:
+        name: epel-release
+- hosts: os_Debian
+  become: yes
+  tasks:
+  - name: Add https and certs
+    apt:
+      name:
+      - apt-transport-https
+      - ca-certificates
+      state: present
 - hosts: os_Ubuntu:os_Debian
   become: yes
   tasks:
-    - name: Add banyan public signing key
-      apt_key:
-        url: https://www.banyanops.com/onramp/deb-repo/banyan.key
-        state: present
-    - name: Add banyan repo
-      apt_repository:
-        repo: "deb http://www.banyanops.com/onramp/deb-repo xenial main"
-        state: present
+  - name: Add banyan public signing key
+    apt_key:
+      url: https://www.banyanops.com/onramp/deb-repo/banyan.key
+      state: present
+  - name: Add banyan repo
+    apt_repository:
+      repo: "deb https://www.banyanops.com/onramp/deb-repo xenial main"
+      state: present
 - hosts: all
   become: yes
   tasks:
-    - name: Install jq utility
-      copy:
-        src: bin/jq-1.5/jq-linux64
-        dest: /usr/bin/jq
-        mode: 0755
     - name: Install packages
       package:
         name:
           - curl
           - banyan-netagent
+        update_cache: true
         state: present
-    - name: Copy config
-      template:
-        src: ./templates/config.yaml.tpl.j2
-        dest: /opt/banyan-packages/config.yaml.tpl
     - name: Run post-install script
       shell: /opt/banyan-packages/install '{{refresh_token}}' {{cluster_name}}
-#      environment:
-#        BANYAN_API: '{{banyan_api}}'
+      environment:
+        BANYAN_API: '{{banyan_api}}'
+
