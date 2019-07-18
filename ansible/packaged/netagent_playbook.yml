@@ -63,6 +63,6 @@
         state: present
     - name: Run post-install script
       shell: /opt/banyan-packages/install '{{refresh_token}}' {{cluster_name}}
-      environment:
-        BANYAN_API: '{{banyan_api}}'
+#      environment:
+#        BANYAN_API: '{{banyan_api}}'
 
