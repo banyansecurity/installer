@@ -16,7 +16,7 @@
   gather_facts: no
   pre_tasks:
     - name: Install python for Ansible
-      raw: "test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)"
+      raw: "command -v python > /dev/null || (apt -y update && apt install -y python-minimal)"
       register: output
       changed_when: output.stdout != ""
   tasks:
@@ -29,27 +29,17 @@
         src: bin/jq-1.5/jq-linux64
         dest: /usr/bin/jq
         mode: 0755
-    - name: Install configure-netagent
-      copy:
-        src: bin/configure-netagent
-        dest: /opt/banyan-packages/configure-netagent
-        mode: 0755
     - name: Copy package
-      copy:
+      unarchive:
         src: "./{{package_name}}"
-        dest: "/opt/banyan-packages/{{package_name}}"
-    - name: Copy install script
-      copy:
-        src: bin/install
-        dest: /opt/banyan-packages/install
-        mode: 0755
+        dest: "/opt/banyan-packages"
     - name: Copy config
       template:
         src: ./templates/config.yaml.tpl.j2
-        dest: /opt/banyan-packages/config.yaml.tpl
-    - name: Generate packages.env
-      shell: "echo 'NETAGENT_PACKAGE={{package_name}}' > /opt/banyan-packages/packages.env"
-    - name: Run post-install script
-      shell: /opt/banyan-packages/install '{{refresh_token}}' {{cluster_name}}
-#      environment: 
-#        BANYAN_API: '{{banyan_api}}'      
+        dest: /opt/banyan-packages/netagent-{{netagent_version}}/config.yaml.tpl
+    - name: Run configure-bootstrap
+      command: /opt/banyan-packages/netagent-{{netagent_version}}/configure-bootstrap '{{refresh_token}}' {{cluster_name}}
+#      environment:
+#        BANYAN_API: '{{banyan_api}}'
+    - name: Run setup-netagent
+      command: /opt/banyan-packages/netagent-{{netagent_version}}/setup-netagent.sh

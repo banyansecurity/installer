@@ -1,23 +1,47 @@
 # Banyan Netagent configuration
 
 # GPG password (available from Banyan)
-gpg_password:
+gpg_password: "gobany@n"
 
 # Shield address as IP_ADDR:PORT
 shield_address: 127.0.0.1:1200
-# Listen TCP port on localhost
+# Listen TCP port on localhost for proxying
 listen_port: 9999
+# Listen TCP port on all local IPs for netagent health check
+listen_port_health: 9998
 
 # Set to true if Shield requires secure bootstrapping
-secure_bootstrap: true
+secure_bootstrap: false
 # One Time Key to register Netagent, mandatory if Shield requires secure bootstrapping (available from Banyan Dashboard)
-one_time_key:
+one_time_key: ""
 
-# Label all processes/containers on the host with custom metadata (list of key: value pairs)
+############################
+# BEGIN ACCESS TIER SETTINGS
+############################
+
+# Deploy netagent in elastic access tier
+access_tier: false
+# Display name of the site in the Command Center.
+site_name: ""
+# True (canonical) domain name of the site.
+site_address: ""
+# Comma-separated list of domain names that can alias the site_address.
+site_domain_names: ""
+# (OPTIONAL) boolean that indicates whether the site is autoscale-enabled.
+# site_autoscale: false
+
+############################
+# END ACCESS TIER SETTINGS
+############################
+
+# Label all processes/containers on the host with custom metadata (list of key:value pairs)
 host_tags: {{netagent_tags}}
+    # Example where key=ostype, val=linux:
+    # ostype: linux
+
 
 # Visibility mode (ignore CIDRs, roles, policies)
-visibility_only: true
+visibility_only: false
 # Source of public IP info: AWS, GCE, default, none
 public_ip_source: default
 # Disable L7 protocol parsing
@@ -27,11 +51,6 @@ ignore_traffic:
     - consul
     - etcd
     - haproxy
-
-# Deploy netagent in elastic access tier
-access_tier: false
-# Provide client address transparency
-address_transparency: true
 
 # Lifetime of a certificate
 cert_lifetime: 24h
@@ -56,8 +75,8 @@ file_log_level: INFO
 
 # ****************** shield ********************/
 
-# If Shield goes down for this long then policies switch to permissive
-# shield_timeout: 10m
+# If Shield goes down for this long then policies switch to permissive (default is 0=disabled)
+# shield_timeout:
 
 # ****************** proxy *********************/
 
@@ -121,6 +140,9 @@ file_log_level: INFO
 # Enable request level access events
 # request_level_events: true
 
+# Provide client address transparency (forced to false when access tier is true)
+# address_transparency: true
+
 # ************* keypair ************************/
 
 # Use RSA instead of ECDSA
@@ -140,6 +162,6 @@ file_log_level: INFO
 # Use Istio
 # istio: false
 # Address to access Istio data
-# istio_address: 
+# istio_address:
 # Address to listen for Istio authz requests
 # istio_auth_listen: localhost:9990

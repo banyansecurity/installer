@@ -23,7 +23,7 @@ Create an inventory file and specify cluster configuration using inventory varia
 Example inventory `my_inventory`:
 ```
 [all:vars]
-package_name=netagent-0.7.1.tar.gz
+package_name=netagent-<version>.tar.gz
 cluster_name=cluster1
 refresh_token=<refresh token>
 
