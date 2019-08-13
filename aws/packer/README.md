@@ -1,4 +1,4 @@
-# Packer can bake Banyan Netagent into an AMI image
+# Custom AMI image with Banyan Netagent
 
 ## prequisites
 
