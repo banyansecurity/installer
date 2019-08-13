@@ -1,0 +1,63 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: no
+  pre_tasks:
+    - name: Install python for Ansible
+      raw: "command -v python > /dev/null || (apt -y update && apt install -y python3) || yum -y install python"
+      register: output
+      changed_when: output.stdout != ""
+    - setup:
+  tasks:
+    - group_by:
+        key: os_{{ansible_distribution}}
+- hosts: os_CentOS:os_RedHat:os_Amazon
+  become: yes
+  tasks:
+    - name: Add Banyan public key
+      rpm_key:
+        state: present
+        key: https://www.banyanops.com/onramp/repo/RPM-GPG-KEY-banyan
+    - name: Add banyan repo
+      yum_repository:
+        name: banyan-prod
+        description: banyan prod repo
+        baseurl: https://www.banyanops.com/onramp/repo/
+        gpgcheck: true
+        gpgkey: https://www.banyanops.com/onramp/repo/RPM-GPG-KEY-banyan
+- hosts: os_CentOS
+  become: yes
+  tasks:
+    - name: Enable EPEL
+      package:
+        name: epel-release
+- hosts: os_Debian
+  become: yes
+  tasks:
+  - name: Add https and certs
+    apt:
+      name:
+      - apt-transport-https
+      - ca-certificates
+      state: present
+- hosts: os_Ubuntu:os_Debian
+  become: yes
+  tasks:
+  - name: Add banyan public signing key
+    apt_key:
+      url: https://www.banyanops.com/onramp/deb-repo/banyan.key
+      state: present
+  - name: Add banyan repo
+    apt_repository:
+      repo: "deb https://www.banyanops.com/onramp/deb-repo xenial main"
+      state: present
+- hosts: all
+  become: yes
+  tasks:
+    - name: Install packages 
+      package:
+        name:
+          - curl
+          - banyan-netagent-{{netagent_version}}
+        update_cache: true
+        state: present

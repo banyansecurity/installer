@@ -1,0 +1,33 @@
+{
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": "",
+    "netagent_version": "1.5.0"
+  },
+  "sensitive-variables": ["aws_access_key", "aws_secret_key"],
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "us-east-1",
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "amzn2-ami-hvm-2.0.*-x86_64-gp2",
+          "root-device-type": "ebs"
+        },
+        "owners": ["137112412989"],
+        "most_recent": true
+      },
+      "instance_type": "t2.micro",
+      "ssh_username": "ec2-user",
+      "ami_name": "banyan-netagent-{{user `netagent_version`}} {{timestamp}}"
+    }
+  ],
+  "provisioners": [{
+    "type": "ansible",
+    "playbook_file": "./playbook.yml",
+    "extra_arguments": ["--extra-vars", "netagent_version={{user `netagent_version`}}"]
+  }]
+}
