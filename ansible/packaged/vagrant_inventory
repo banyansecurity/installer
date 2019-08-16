@@ -1,7 +1,7 @@
 [all:vars]
-netagent_version=0.7.5
-cluster_name=<your cluster>
-refresh_token=<your refresh token>
+netagent_version=1.5.0
+cluster_name=testcluster
+refresh_token=
 netagent_tags="{ os: linux }"
 
 [myhosts]

@@ -57,12 +57,19 @@
     - name: Install packages
       package:
         name:
+          - tar
+          - gzip
+          - sed
+          - jq
           - curl
           - banyan-netagent
         update_cache: true
         state: present
     - name: Run post-install script
       shell: /opt/banyan-packages/install '{{refresh_token}}' {{cluster_name}}
-#      environment:
-#        BANYAN_API: '{{banyan_api}}'
+      environment:
+        BANYAN_ACCESS_TIER: true
+        BANYAN_SITE_NAME: CIT Banyan access
+        BANYAN_SITE_ADDRESS: 3.227.188.170 
+        BANYAN_SITE_DOMAIN_NAMES: c.bvnt.co
 
