@@ -6,7 +6,7 @@
       "ParameterGroups" : [
         {
           "Label": { "default" : "Network Configuration" },
-          "Parameters": [ "VPCID", "PublicSubnets", "PrivateSubnets", "SSHKeyName", "ManagementCidr", "HealthCheckCidr", "AmiId"]
+          "Parameters": [ "VPCID", "PublicSubnets", "PrivateSubnets", "SSHKeyName", "ManagementCidr", "HealthCheckCidr", "DefaultAmiId", "AmiId"]
         },
         {
           "Label": { "default": "Banyan Configuration" },
@@ -14,7 +14,8 @@
         }
       ],
       "ParameterLabels": {
-        "VPCID": { "default" : "Which VPC should this be deployed to?" }
+        "VPCID": { "default": "Which VPC should Banyan Access Tier be deployed to?" },
+        "AmiId": { "default": "AMI base image" }
       }
     }
   },
@@ -57,10 +58,10 @@
       "AllowedPattern": "^https://[^\\s]+"
     },
     "BanyanPackage": {
-      "Description": "Package name",
+      "Description": "Package name (e.g. banyan-netagent-1.5.0)",
       "Type": "String",
-      "Default": "https://s3-us-west-2.amazonaws.com/www.banyanops.com/onramp/repo/RPMS/x86_64/banyan-netagent-1.5.0-1.el7.x86_64.rpm",
-      "AllowedPattern": "^https://[A-Za-z0-9._/-]+"
+      "Default": "banyan-netagent",
+      "AllowedPattern": "^banyan-netagent[0-9.-]*"
     },
     "BanyanHostTags": {
       "Description": "(optional) key=value, comma separated host tag pairs",
@@ -69,7 +70,7 @@
       "AllowedPattern": "^([A-Za-z0-9_/-]+=[A-Za-z0-9_/-]*,?)*[^,]$"
     },
     "SSHKeyName": {
-      "Description": "Enables access to instances via SSH",
+      "Description": "optional; enables ssh access to instances",
       "Type": "AWS::EC2::KeyPair::KeyName"
     },
     "HealthCheckCidr": {
@@ -82,9 +83,27 @@
       "Type": "String",
       "Default": "0.0.0.0/0"
     },
-    "AmiId": {
+    "DefaultAmiId": {
+      "Description": "Default base AMI",
       "Type":  "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
       "Default": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+    },
+    "AmiId": {
+      "Description": "optional; leave blank to use latest Amazon Linux 2 AMI",
+      "Type":  "String",
+      "Default": ""
+    }
+  },
+  "Conditions": {
+    "EnableSSH": {
+      "Fn::Not": [
+        {"Fn::Equals": ["", {"Ref": "SSHKeyName"}]}
+      ]
+    },
+    "UseCustomAmi": {
+      "Fn::Not": [
+        {"Fn::Equals": ["", {"Ref": "AmiId"}]}
+      ]
     }
   },
   "Resources": {
@@ -161,14 +180,12 @@
     "BanyanLaunchConfig": {
       "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Properties": {
-        "KeyName": {
-          "Ref": "SSHKeyName"
-        },
-        "ImageId": {"Ref": "AmiId"},
+        "KeyName": {"Fn::If": ["EnableSSH", {"Ref": "SSHKeyName"}, {"Ref": "AWS::NoValue"}]},
+        "ImageId": {"Fn::If": ["UseCustomAmi", {"Ref": "AmiId"}, {"Ref": "DefaultAmiId"}]},
         "SecurityGroups": [
           {"Ref": "BanyanSecurityGroup"}
         ],
-        "InstanceType": "t2.micro",
+        "InstanceType": "m5.large",
         "BlockDeviceMappings": [
           {
             "DeviceName": "/dev/sdc",
@@ -193,12 +210,9 @@
                   "Ref": "AWS::Region"
                 },
                 "\n",
-                "curl -O ",
-                {"Ref": "BanyanPackage"},
-                "\n",
-                "yum -y --nogpgcheck install ",
-                {"Ref": "BanyanPackage"},
-                "\n",
+                "rpm --import https://www.banyanops.com/onramp/repo/RPM-GPG-KEY-banyan\n",
+                "yum-config-manager --add-repo https://www.banyanops.com/onramp/repo\n",
+                "yum install -y ", {"Ref": "BanyanPackage"}, "\n",
                 "cd /opt/banyan-packages\n",
                 "BANYAN_ACCESS_TIER=true",
                 " ",
@@ -270,9 +284,9 @@
         "LaunchConfigurationName": {
           "Ref": "BanyanLaunchConfig"
         },
-        "DesiredCapacity": 2,
-        "MinSize": 1,
-        "MaxSize": 2,
+        "DesiredCapacity": "2",
+        "MinSize": "1",
+        "MaxSize": "4",
         "VPCZoneIdentifier": {
           "Ref": "PrivateSubnets"
         },
@@ -313,12 +327,21 @@
           "Count": "1",
           "Timeout": "PT5M"
         }
+      },
+      "UpdatePolicy": {
+        "AutoScalingRollingUpdate": {
+          "MaxBatchSize": "2",
+          "MinInstancesInService": "1",
+          "MinSuccessfulInstancesPercent": "100",
+          "PauseTime": "PT5M",
+          "WaitOnResourceSignals": "true"
+        }
       }
     }
   },
   "Outputs": {
     "LoadBalancer" : {
-      "Value": { "Fn::GetAtt" : [ "BanyanNLB", "DNSName" ]}
+      "Value": { "Fn::GetAtt": [ "BanyanNLB", "DNSName" ]}
     }
   }
 }
