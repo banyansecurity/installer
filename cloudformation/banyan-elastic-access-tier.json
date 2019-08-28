@@ -278,6 +278,21 @@
         }
       }
     },
+    "BanyanCPUPolicy":{
+      "Type":"AWS::AutoScaling::ScalingPolicy",
+      "Properties":{
+        "AutoScalingGroupName":{
+          "Ref":"BanyanASG"
+        },
+        "PolicyType":"TargetTrackingScaling",
+        "TargetTrackingConfiguration":{
+          "PredefinedMetricSpecification":{
+            "PredefinedMetricType":"ASGAverageCPUUtilization"
+          },
+          "TargetValue": "80"
+        }
+      }
+    },
     "BanyanASG": {
       "Type": "AWS::AutoScaling::AutoScalingGroup",
       "Properties": {
@@ -285,8 +300,8 @@
           "Ref": "BanyanLaunchConfig"
         },
         "DesiredCapacity": "2",
-        "MinSize": "1",
-        "MaxSize": "4",
+        "MinSize": "2",
+        "MaxSize": "10",
         "VPCZoneIdentifier": {
           "Ref": "PrivateSubnets"
         },
@@ -304,11 +319,6 @@
                 ]
               ]
             },
-            "PropagateAtLaunch": "true"
-          },
-          {
-            "Key": "Network",
-            "Value": "Public",
             "PropagateAtLaunch": "true"
           },
           {
@@ -331,7 +341,7 @@
       "UpdatePolicy": {
         "AutoScalingRollingUpdate": {
           "MaxBatchSize": "2",
-          "MinInstancesInService": "1",
+          "MinInstancesInService": "2",
           "MinSuccessfulInstancesPercent": "100",
           "PauseTime": "PT5M",
           "WaitOnResourceSignals": "true"
