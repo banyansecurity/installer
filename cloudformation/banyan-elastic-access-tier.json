@@ -38,7 +38,8 @@
       "Description": "Name of the cluster to join",
       "AllowedPattern": "^[A-Za-z0-9_-]+",
       "Type": "String",
-      "Default": "cluster1"
+      "Default": "cluster1",
+      "MinLength": "1"
     },
     "BanyanRefreshToken": {
       "Description": "Create a Refresh Token in the 'My Profile' section of the Banyan console",
@@ -49,7 +50,8 @@
     "BanyanSiteDomainNames": {
       "Default": "*.trusted.example.com",
       "Description": "Alias or CNAME(s) that route traffic to this access tier. Separate multiple values with a comma.",
-      "Type": "String"
+      "Type": "String",
+      "MinLength": "1"
     },
     "BanyanApiServer": {
       "Description": "API Server",
@@ -71,17 +73,24 @@
     },
     "SSHKeyName": {
       "Description": "optional; enables ssh access to instances",
-      "Type": "AWS::EC2::KeyPair::KeyName"
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "MinLength": "1"
     },
     "HealthCheckCidr": {
       "Description": "Allow NLB HealthCheck from specified CIDR range",
       "Type": "String",
-      "Default": "0.0.0.0/0"
+      "Default": "0.0.0.0/0",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "must be a valid IPv4 CIDR range of the form x.x.x.x/x.",
+      "MinLength": "1"
     },
     "ManagementCidr": {
       "Description": "Allow SSH from specified CIDR range",
       "Type": "String",
-      "Default": "0.0.0.0/0"
+      "Default": "0.0.0.0/0",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "must be a valid IPv4 CIDR range of the form x.x.x.x/x.",
+      "MinLength": "1"
     },
     "DefaultAmiId": {
       "Description": "Default base AMI",
@@ -95,11 +104,6 @@
     }
   },
   "Conditions": {
-    "EnableSSH": {
-      "Fn::Not": [
-        {"Fn::Equals": ["", {"Ref": "SSHKeyName"}]}
-      ]
-    },
     "UseCustomAmi": {
       "Fn::Not": [
         {"Fn::Equals": ["", {"Ref": "AmiId"}]}
@@ -180,7 +184,7 @@
     "BanyanLaunchConfig": {
       "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Properties": {
-        "KeyName": {"Fn::If": ["EnableSSH", {"Ref": "SSHKeyName"}, {"Ref": "AWS::NoValue"}]},
+        "KeyName": {"Ref": "SSHKeyName"},
         "ImageId": {"Fn::If": ["UseCustomAmi", {"Ref": "AmiId"}, {"Ref": "DefaultAmiId"}]},
         "SecurityGroups": [
           {"Ref": "BanyanSecurityGroup"}
