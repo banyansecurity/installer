@@ -1,5 +1,4 @@
 [all:vars]
-netagent_version=0.7.5
 cluster_name=<your cluster>
 refresh_token=<your refresh token>
 netagent_tags="{ os: linux }"
