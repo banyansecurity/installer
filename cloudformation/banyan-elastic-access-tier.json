@@ -120,24 +120,28 @@
           {
             "IpProtocol": "tcp",
             "CidrIp": "0.0.0.0/0",
-            "FromPort": 22,
-            "ToPort": 22
+            "Description": "TCP Services secured by Banyan",
+            "FromPort": 8443,
+            "ToPort": 8443
           },
           {
             "IpProtocol": "tcp",
             "CidrIp": "0.0.0.0/0",
+            "Description": "Web Services secured by Banyan",
             "FromPort": 443,
             "ToPort": 443
           },
           {
             "IpProtocol": "tcp",
             "CidrIp": {"Ref": "HealthCheckCidr"},
+            "Description": "Health Check used for AutoScaling",            
             "FromPort": 9998,
             "ToPort": 9998
           },
           {
             "IpProtocol": "tcp",
             "CidrIp": {"Ref":  "ManagementCidr"},
+            "Description": "SSH for Management & Troubleshooting",            
             "FromPort": 2222,
             "ToPort": 2222
           }
@@ -167,17 +171,17 @@
         "Protocol": "TCP"
       }
     },
-    "Listener22": {
+    "Listener8443": {
       "Type": "AWS::ElasticLoadBalancingV2::Listener",
       "Properties": {
         "DefaultActions": [
           {
             "Type": "forward",
-            "TargetGroupArn": {"Ref": "BanyanTargetGroup22"}
+            "TargetGroupArn": {"Ref": "BanyanTargetGroup8443"}
           }
         ],
         "LoadBalancerArn": {"Ref": "BanyanNLB"},
-        "Port": 22,
+        "Port": 8443,
         "Protocol": "TCP"
       }
     },
@@ -267,7 +271,7 @@
         }
       }
     },
-    "BanyanTargetGroup22": {
+    "BanyanTargetGroup8443": {
       "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
       "Properties": {
         "HealthCheckProtocol": "HTTP",
@@ -275,7 +279,7 @@
         "HealthCheckIntervalSeconds": "30",
         "HealthyThresholdCount": "2",
         "UnhealthyThresholdCount": "2",
-        "Port": 22,
+        "Port": 8443,
         "Protocol": "TCP",
         "VpcId": {
           "Ref": "VPCID"
@@ -333,7 +337,7 @@
         ],
         "TargetGroupARNs": [
           {"Ref": "BanyanTargetGroup443"},
-          {"Ref": "BanyanTargetGroup22"}
+          {"Ref": "BanyanTargetGroup8443"}
         ]
       },
       "CreationPolicy": {
