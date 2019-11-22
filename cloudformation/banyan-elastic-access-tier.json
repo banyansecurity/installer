@@ -6,16 +6,19 @@
       "ParameterGroups" : [
         {
           "Label": { "default" : "Network Configuration" },
-          "Parameters": [ "VPCID", "PublicSubnets", "PrivateSubnets", "SSHKeyName", "ManagementCidr", "HealthCheckCidr", "DefaultAmiId", "AmiId"]
+          "Parameters": [ "VPCID", "PublicSubnets", "PrivateSubnets", "HealthCheckCidr", "CrossZoneEnabled"]
+        },
+        {
+          "Label": {"default": "Instance Configuration"},
+          "Parameters": ["MinInstances", "KeyName", "DefaultAmiId", "AmiId", "ManagementCidr"]
         },
         {
           "Label": { "default": "Banyan Configuration" },
-          "Parameters": [ "BanyanClusterName", "BanyanRefreshToken", "BanyanSiteDomainNames", "BanyanApiServer", "BanyanPackage", "BanyanHostTags" ]
+          "Parameters": ["BanyanClusterName", "BanyanRefreshToken", "BanyanSiteDomainNames", "BanyanApiServer", "BanyanPackage", "BanyanHostTags"]
         }
       ],
       "ParameterLabels": {
-        "VPCID": { "default": "Which VPC should Banyan Access Tier be deployed to?" },
-        "AmiId": { "default": "AMI base image" }
+        "VPCID": { "default": "Which VPC should this Access Tier be deployed to?" }
       }
     }
   },
@@ -33,6 +36,17 @@
       "Default": "",
       "Description": "Private subnets for the instances.",
       "Type": "List<AWS::EC2::Subnet::Id>"
+    },
+    "MinInstances": {
+      "Default": "2",
+      "Description": "Minimum number of instances. 1 instance per az (subnet) recommended",
+      "Type": "String"
+    },
+    "CrossZoneEnabled": {
+      "Default": "false",
+      "Description": "Enable to distribute traffic across all available instances",
+      "Type": "String",
+      "AllowedValues" : ["true", "false"]
     },
     "BanyanClusterName": {
       "Description": "Name of the cluster to join",
@@ -71,13 +85,13 @@
       "Default": "type=access_tier",
       "AllowedPattern": "^([A-Za-z0-9_/-]+=[A-Za-z0-9_/-]*,?)*[^,]$"
     },
-    "SSHKeyName": {
-      "Description": "optional; enables ssh access to instances",
-      "Type": "AWS::EC2::KeyPair::KeyName",
-      "MinLength": "1"
+    "KeyName": {
+      "Description": "(optional) enables SSH on port 2222 for Access Tier instances",
+      "Type": "String",
+      "Default": ""
     },
     "HealthCheckCidr": {
-      "Description": "Allow NLB HealthCheck from specified CIDR range",
+      "Description": "CIDR range to allow NLB HealthCheck from. Recommend using the VPC CIDR range",
       "Type": "String",
       "Default": "0.0.0.0/0",
       "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
@@ -85,7 +99,7 @@
       "MinLength": "1"
     },
     "ManagementCidr": {
-      "Description": "Allow SSH from specified CIDR range",
+      "Description": "Allow SSH to this Access Tier on port 2222 from the specified CIDR range",
       "Type": "String",
       "Default": "0.0.0.0/0",
       "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
@@ -98,7 +112,7 @@
       "Default": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
     },
     "AmiId": {
-      "Description": "optional; leave blank to use latest Amazon Linux 2 AMI",
+      "Description": "(optional) leave blank to use latest Amazon Linux 2 AMI",
       "Type":  "String",
       "Default": ""
     }
@@ -108,7 +122,11 @@
       "Fn::Not": [
         {"Fn::Equals": ["", {"Ref": "AmiId"}]}
       ]
-    }
+    },
+    "HasKeyName": {
+      "Fn::Not": [
+        {"Fn::Equals": ["", {"Ref": "KeyName"}]}
+      ]}
   },
   "Resources": {
     "BanyanSecurityGroup": {
@@ -154,7 +172,13 @@
         "Type": "network",
         "IpAddressType": "ipv4",
         "Scheme": "internet-facing",
-        "Subnets": {"Ref": "PublicSubnets"}
+        "Subnets": {"Ref": "PublicSubnets"},
+        "LoadBalancerAttributes": [
+          {
+            "Key": "load_balancing.cross_zone.enabled",
+            "Value":  {"Ref": "CrossZoneEnabled"}
+          }
+        ]
       }
     },
     "Listener443": {
@@ -188,7 +212,7 @@
     "BanyanLaunchConfig": {
       "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Properties": {
-        "KeyName": {"Ref": "SSHKeyName"},
+        "KeyName": {"Fn::If": ["HasKeyName", {"Ref": "KeyName"}, {"Ref": "AWS::NoValue"}]},
         "ImageId": {"Fn::If": ["UseCustomAmi", {"Ref": "AmiId"}, {"Ref": "DefaultAmiId"}]},
         "SecurityGroups": [
           {"Ref": "BanyanSecurityGroup"}
@@ -307,8 +331,12 @@
         "LaunchConfigurationName": {
           "Ref": "BanyanLaunchConfig"
         },
-        "DesiredCapacity": "2",
-        "MinSize": "2",
+        "DesiredCapacity": {
+          "Ref": "MinInstances"
+        },
+        "MinSize": {
+          "Ref": "MinInstances"
+        },
         "MaxSize": "10",
         "VPCZoneIdentifier": {
           "Ref": "PrivateSubnets"
@@ -358,7 +386,10 @@
     }
   },
   "Outputs": {
-    "LoadBalancer" : {
+    "LoadBalancerCanonicalHostedZoneID": {
+      "Value": { "Fn::GetAtt": [ "BanyanNLB", "CanonicalHostedZoneID" ]}
+    },
+    "LoadBalancer": {
       "Value": { "Fn::GetAtt": [ "BanyanNLB", "DNSName" ]}
     }
   }
