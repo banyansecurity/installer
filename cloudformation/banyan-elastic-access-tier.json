@@ -63,9 +63,9 @@
     },
     "BanyanSiteDomainNames": {
       "Default": "*.trusted.example.com",
-      "Description": "Alias or CNAME(s) that route traffic to this access tier. Separate multiple values with a comma.",
+      "Description": "Alias or CNAME(s) that route traffic to this access tier. Separate multiple values with a comma. Spaces not allowed.",
       "Type": "String",
-      "MinLength": "1"
+      "AllowedPattern": "^([\\S]+,?)*[^,]$"
     },
     "BanyanApiServer": {
       "Description": "API Server",
@@ -80,7 +80,7 @@
       "AllowedPattern": "^banyan-netagent[0-9.-]*"
     },
     "BanyanHostTags": {
-      "Description": "(optional) key=value, comma separated host tag pairs",
+      "Description": "(optional) key=value, comma-separated host tag pairs. Spaces not allowed.",
       "Type": "String",
       "Default": "type=access_tier",
       "AllowedPattern": "^([A-Za-z0-9_/-]+=[A-Za-z0-9_/-]*,?)*[^,]$"
