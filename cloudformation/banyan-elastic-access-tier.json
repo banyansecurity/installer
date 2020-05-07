@@ -159,9 +159,16 @@
           {
             "IpProtocol": "tcp",
             "CidrIp": {"Ref":  "ManagementCidr"},
-            "Description": "SSH for Management & Troubleshooting",            
+            "Description": "SSH for Management & Troubleshooting",
             "FromPort": 2222,
             "ToPort": 2222
+          },
+          {
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "Description": "http traffic to be redirected to https ",
+            "FromPort": 80,
+            "ToPort": 80
           }
         ]
       }
@@ -209,6 +216,20 @@
         "Protocol": "TCP"
       }
     },
+    "Listener80": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {"Ref": "BanyanTargetGroup80"}
+          }
+        ],
+        "LoadBalancerArn": {"Ref": "BanyanNLB"},
+        "Port": 80,
+        "Protocol": "TCP"
+      }
+    },
     "BanyanLaunchConfig": {
       "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Properties": {
@@ -247,6 +268,8 @@
                 "yum install -y ", {"Ref": "BanyanPackage"}, "\n",
                 "cd /opt/banyan-packages\n",
                 "BANYAN_ACCESS_TIER=true",
+                " ",
+                "BANYAN_REDIRECT_TO_HTTPS=true",
                 " ",
                 "BANYAN_SITE_NAME=", {"Ref": "AWS::StackName"},
                 " ",
@@ -310,6 +333,21 @@
         }
       }
     },
+    "BanyanTargetGroup80": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckPort": "9998",
+        "HealthCheckIntervalSeconds": "30",
+        "HealthyThresholdCount": "2",
+        "UnhealthyThresholdCount": "2",
+        "Port": 80,
+        "Protocol": "TCP",
+        "VpcId": {
+          "Ref": "VPCID"
+        }
+      }
+    },
     "BanyanCPUPolicy":{
       "Type":"AWS::AutoScaling::ScalingPolicy",
       "Properties":{
@@ -365,7 +403,8 @@
         ],
         "TargetGroupARNs": [
           {"Ref": "BanyanTargetGroup443"},
-          {"Ref": "BanyanTargetGroup8443"}
+          {"Ref": "BanyanTargetGroup8443"},
+          {"Ref": "BanyanTargetGroup80"}
         ]
       },
       "CreationPolicy": {
