@@ -1,0 +1,6 @@
+[submodule "terraform/terraform-aws-banyan-network"]
+	path = terraform/terraform-aws-banyan-network
+	url = https://github.com/banyansecurity/terraform-aws-banyan-network
+[submodule "terraform/terraform-aws-banyan-accesstier"]
+	path = terraform/terraform-aws-banyan-accesstier
+	url = https://github.com/banyansecurity/terraform-aws-banyan-accesstier
