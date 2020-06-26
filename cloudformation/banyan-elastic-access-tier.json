@@ -27,7 +27,7 @@
             "AccessEventCreditsPerInterval",
             "AccessEventKeyLimiting",
             "AccessEventKeyExpiration"
-	  ]
+          ]
         }
       ],
       "ParameterLabels": {
