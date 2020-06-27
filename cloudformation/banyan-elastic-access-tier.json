@@ -98,37 +98,37 @@
       "Default": "type=access_tier",
       "AllowedPattern": "^([A-Za-z0-9_/-]+=[A-Za-z0-9_/-]*,?)*[^,]$"
     },
-    "AccessEventCreditsLimiting": {
+    "BanyanAccessEventCreditsLimiting": {
       "Default": "true",
       "Description": "Enable access event limiting by credits",
       "Type": "String",
       "AllowedValues": ["true", "false"]
     },
-    "AccessEventCreditsMax": {
+    "BanyanAccessEventCreditsMax": {
       "Default": "1000",
       "Description": "Max credits for access event credit limiting",
       "Type": "String",
       "AllowedPattern": "^[0-9]+$"
     },
-    "AccessEventCreditsInterval": {
+    "BanyanAccessEventCreditsInterval": {
       "Default": "1m",
       "Description": "Time period for credit accrual",
       "Type": "String",
       "AllowedPattern": "^[a-z0-9]+$"
     },
-    "AccessEventCreditsPerInterval": {
+    "BanyanAccessEventCreditsPerInterval": {
       "Default": "1",
       "Description": "Number of credits accrued each time period",
       "Type": "String",
       "AllowedPattern": "^[0-9]+$"
     },
-    "AccessEventKeyLimiting": {
+    "BanyanAccessEventKeyLimiting": {
       "Default": "true",
       "Description": "Enable access event limiting by key",
       "Type": "String",
       "AllowedValues": ["true", "false"]
     },
-    "AccessEventKeyExpiration": {
+    "BanyanAccessEventKeyExpiration": {
       "Default": "9m",
       "Description": "Key expiration time",
       "Type": "String",
@@ -331,6 +331,18 @@
                 "BANYAN_API=", {"Ref": "BanyanApiServer"},
                 " ",
                 "BANYAN_HOST_TAGS=", {"Ref":  "BanyanHostTags"},
+                " ",
+                "BANYAN_ACCESS_EVENT_CREDITS_LIMITING=", {"Ref":  "BanyanAccessEventCreditsLimiting"},
+                " ",
+                "BANYAN_ACCESS_EVENT_CREDITS_MAX=", {"Ref":  "BanyanAccessEventCreditsMax"},
+                " ",
+                "BANYAN_ACCESS_EVENT_CREDITS_INTERVAL=", {"Ref":  "BanyanAccessEventCreditsInterval"},
+                " ",
+                "BANYAN_ACCESS_EVENT_CREDITS_PER_INTERVAL=", {"Ref":  "BanyanAccessEventCreditsPerInterval"},
+                " ",
+                "BANYAN_ACCESS_EVENT_KEY_LIMITING=", {"Ref":  "BanyanAccessEventKeyLimiting"},
+                " ",
+                "BANYAN_ACCESS_EVENT_KEY_EXPIRATION=", {"Ref":  "BanyanAccessEventKeyExpiration"},
                 " ",
                 "./install ",
                 {"Ref": "BanyanRefreshToken"},
