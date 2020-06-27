@@ -90,7 +90,7 @@
       "Description": "Package name (e.g. banyan-netagent-1.5.0)",
       "Type": "String",
       "Default": "banyan-netagent",
-      "AllowedPattern": "^banyan-netagent[0-9.-]*"
+      "AllowedPattern": "^banyan-netagent[a-z0-9._-]*"
     },
     "BanyanHostTags": {
       "Description": "(optional) key=value, comma-separated host tag pairs. Spaces not allowed.",
@@ -312,8 +312,8 @@
                   "Ref": "AWS::Region"
                 },
                 "\n",
-                "rpm --import https://www.banyanops.com/onramp/repo/RPM-GPG-KEY-banyan\n",
-                "yum-config-manager --add-repo https://www.banyanops.com/onramp/repo\n",
+                "rpm --import https://www-stage.bnntest.com/onramp/repo/RPM-GPG-KEY-banyan\n",
+                "yum-config-manager --add-repo https://www-stage.bnntest.com/onramp/repo\n",
                 "yum install -y ", {"Ref": "BanyanPackage"}, "\n",
                 "cd /opt/banyan-packages\n",
                 "BANYAN_ACCESS_TIER=true",
