@@ -14,7 +14,20 @@
         },
         {
           "Label": { "default": "Banyan Configuration" },
-          "Parameters": ["BanyanClusterName", "BanyanRefreshToken", "BanyanSiteDomainNames", "BanyanApiServer", "BanyanPackage", "BanyanHostTags"]
+          "Parameters": [
+            "BanyanClusterName",
+            "BanyanRefreshToken",
+            "BanyanSiteDomainNames",
+            "BanyanApiServer",
+            "BanyanPackage",
+            "BanyanHostTags",
+            "AccessEventCreditsLimiting",
+            "AccessEventCreditsMax",
+            "AccessEventCreditsInterval",
+            "AccessEventCreditsPerInterval",
+            "AccessEventKeyLimiting",
+            "AccessEventKeyExpiration"
+          ]
         }
       ],
       "ParameterLabels": {
@@ -84,6 +97,42 @@
       "Type": "String",
       "Default": "type=access_tier",
       "AllowedPattern": "^([A-Za-z0-9_/-]+=[A-Za-z0-9_/-]*,?)*[^,]$"
+    },
+    "BanyanAccessEventCreditsLimiting": {
+      "Default": "true",
+      "Description": "Enable access event limiting by credits",
+      "Type": "String",
+      "AllowedValues": ["true", "false"]
+    },
+    "BanyanAccessEventCreditsMax": {
+      "Default": "1000",
+      "Description": "Max credits for access event credit limiting",
+      "Type": "String",
+      "AllowedPattern": "^[0-9]+$"
+    },
+    "BanyanAccessEventCreditsInterval": {
+      "Default": "1m",
+      "Description": "Time period for credit accrual",
+      "Type": "String",
+      "AllowedPattern": "^[a-z0-9]+$"
+    },
+    "BanyanAccessEventCreditsPerInterval": {
+      "Default": "1",
+      "Description": "Number of credits accrued each time period",
+      "Type": "String",
+      "AllowedPattern": "^[0-9]+$"
+    },
+    "BanyanAccessEventKeyLimiting": {
+      "Default": "true",
+      "Description": "Enable access event limiting by key",
+      "Type": "String",
+      "AllowedValues": ["true", "false"]
+    },
+    "BanyanAccessEventKeyExpiration": {
+      "Default": "9m",
+      "Description": "Key expiration time",
+      "Type": "String",
+      "AllowedPattern": "^[a-z0-9]+$"
     },
     "KeyName": {
       "Description": "(optional) enables SSH on port 2222 for Access Tier instances",
@@ -282,6 +331,18 @@
                 "BANYAN_API=", {"Ref": "BanyanApiServer"},
                 " ",
                 "BANYAN_HOST_TAGS=", {"Ref":  "BanyanHostTags"},
+                " ",
+                "BANYAN_ACCESS_EVENT_CREDITS_LIMITING=", {"Ref":  "BanyanAccessEventCreditsLimiting"},
+                " ",
+                "BANYAN_ACCESS_EVENT_CREDITS_MAX=", {"Ref":  "BanyanAccessEventCreditsMax"},
+                " ",
+                "BANYAN_ACCESS_EVENT_CREDITS_INTERVAL=", {"Ref":  "BanyanAccessEventCreditsInterval"},
+                " ",
+                "BANYAN_ACCESS_EVENT_CREDITS_PER_INTERVAL=", {"Ref":  "BanyanAccessEventCreditsPerInterval"},
+                " ",
+                "BANYAN_ACCESS_EVENT_KEY_LIMITING=", {"Ref":  "BanyanAccessEventKeyLimiting"},
+                " ",
+                "BANYAN_ACCESS_EVENT_KEY_EXPIRATION=", {"Ref":  "BanyanAccessEventKeyExpiration"},
                 " ",
                 "./install ",
                 {"Ref": "BanyanRefreshToken"},
