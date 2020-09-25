@@ -139,7 +139,7 @@
       "Default": "false",
       "Description": "Derive groups information from userinfo endpoint to solve big Cookie issue",
       "Type": "String",
-      "AllowedPattern": ["true", "false"]
+      "AllowedValues": ["true", "false"]
     },
     "KeyName": {
       "Description": "(optional) enables SSH on port 2222 for Access Tier instances",
