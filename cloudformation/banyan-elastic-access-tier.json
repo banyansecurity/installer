@@ -27,7 +27,7 @@
             "AccessEventCreditsPerInterval",
             "AccessEventKeyLimiting",
             "AccessEventKeyExpiration",
-            "DeriveGroupsByUserinfo"
+            "GroupsByUserinfo"
           ]
         }
       ],
@@ -135,7 +135,7 @@
       "Type": "String",
       "AllowedPattern": "^[a-z0-9]+$"
     },
-    "DeriveGroupsByUserinfo": {
+    "GroupsByUserinfo": {
       "Default": "false",
       "Description": "Derive groups information from userinfo endpoint to solve big Cookie issue",
       "Type": "String",
@@ -351,7 +351,7 @@
                 " ",
                 "BANYAN_ACCESS_EVENT_KEY_EXPIRATION=", {"Ref":  "BanyanAccessEventKeyExpiration"},
                 " ",
-                "BANYAN_DERIVE_GROUPS_BY_USERINFO=", {"Ref":  "DeriveGroupsByUserinfo"},
+                "BANYAN_GROUPS_BY_USERINFO=", {"Ref":  "GroupsByUserinfo"},
                 " ",
                 "./install ",
                 {"Ref": "BanyanRefreshToken"},
