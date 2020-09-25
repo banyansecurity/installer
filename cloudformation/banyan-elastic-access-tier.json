@@ -26,7 +26,8 @@
             "AccessEventCreditsInterval",
             "AccessEventCreditsPerInterval",
             "AccessEventKeyLimiting",
-            "AccessEventKeyExpiration"
+            "AccessEventKeyExpiration",
+            "DeriveGroupsByUserinfo"
           ]
         }
       ],
@@ -133,6 +134,12 @@
       "Description": "Key expiration time",
       "Type": "String",
       "AllowedPattern": "^[a-z0-9]+$"
+    },
+    "DeriveGroupsByUserinfo": {
+      "Default": "false",
+      "Description": "Derive groups information from userinfo endpoint to solve big Cookie issue",
+      "Type": "String",
+      "AllowedPattern": ["true", "false"]
     },
     "KeyName": {
       "Description": "(optional) enables SSH on port 2222 for Access Tier instances",
@@ -343,6 +350,8 @@
                 "BANYAN_ACCESS_EVENT_KEY_LIMITING=", {"Ref":  "BanyanAccessEventKeyLimiting"},
                 " ",
                 "BANYAN_ACCESS_EVENT_KEY_EXPIRATION=", {"Ref":  "BanyanAccessEventKeyExpiration"},
+                " ",
+                "BANYAN_DERIVE_GROUPS_BY_USERINFO=", {"Ref":  "DeriveGroupsByUserinfo"},
                 " ",
                 "./install ",
                 {"Ref": "BanyanRefreshToken"},
