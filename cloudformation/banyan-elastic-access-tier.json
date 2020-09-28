@@ -137,7 +137,7 @@
     },
     "GroupsByUserinfo": {
       "Default": "false",
-      "Description": "Derive groups information from userinfo endpoint to solve big Cookie issue",
+      "Description": "Derive groups information from userinfo endpoint",
       "Type": "String",
       "AllowedValues": ["true", "false"]
     },
