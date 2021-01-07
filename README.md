@@ -11,7 +11,3 @@ Netagent can run in HostAgent or AccessTier mode using various orchestration pla
 
 **[Terraform for AWS](terraform)**
 
-
-### HostAgent Mode
-
-**[Ansible](ansible)**
