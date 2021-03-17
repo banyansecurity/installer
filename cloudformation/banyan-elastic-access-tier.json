@@ -76,7 +76,7 @@
       "MinLength": 200
     },
     "BanyanSiteDomainNames": {
-      "Default": "*.trusted.example.com",
+      "Default": "*",
       "Description": "Alias or CNAME(s) that route traffic to this access tier. Separate multiple values with a comma. Spaces not allowed.",
       "Type": "String",
       "AllowedPattern": "^([\\S]+,?)*[^,]$"
@@ -106,7 +106,7 @@
       "AllowedValues": ["true", "false"]
     },
     "BanyanAccessEventCreditsMax": {
-      "Default": "1000",
+      "Default": "5000",
       "Description": "Max credits for access event credit limiting",
       "Type": "String",
       "AllowedPattern": "^[0-9]+$"
@@ -118,7 +118,7 @@
       "AllowedPattern": "^[a-z0-9]+$"
     },
     "BanyanAccessEventCreditsPerInterval": {
-      "Default": "1",
+      "Default": "5",
       "Description": "Number of credits accrued each time period",
       "Type": "String",
       "AllowedPattern": "^[0-9]+$"
@@ -136,7 +136,7 @@
       "AllowedPattern": "^[a-z0-9]+$"
     },
     "GroupsByUserinfo": {
-      "Default": "false",
+      "Default": "true",
       "Description": "Derive groups information from userinfo endpoint",
       "Type": "String",
       "AllowedValues": ["true", "false"]
