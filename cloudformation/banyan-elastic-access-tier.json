@@ -336,7 +336,7 @@
                 },
                 "\n",
 		"export DD_API_KEY=", { "Ref": "BanyanDDAPIKey" }, "\n",
-		"if [[ -n \"${DD_API_KEY}\" ]]; then\n"
+		"if [[ -n \"${DD_API_KEY}\" ]]; then\n",
 		"bash -c \"$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)\"\n",
 		"fi\n",
                 "rpm --import https://www.banyanops.com/onramp/repo/RPM-GPG-KEY-banyan\n",
