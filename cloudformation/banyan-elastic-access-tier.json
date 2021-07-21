@@ -135,6 +135,22 @@
       "Type": "String",
       "AllowedPattern": "^[a-z0-9]+$"
     },
+    "BanyanStatsd": {
+      "Default": "false",
+      "Description": "Turn on metrics collection using statsd",
+      "Type": "String",
+      "AllowedValues": ["true", "false"]
+    },
+    "BanyanStatsdAddress": {
+      "Default": "127.0.0.1:8125",
+      "Description": "Address to send statsd messages: 'hostname:port' for UDP; 'unix:///path/to/socket' for UDS",
+      "Type": "String"
+    },
+    "BanyanDDAPIKey": {
+      "Description": "(optional) Datadog API key",
+      "Type": "String",
+      "Default": ""
+    },
     "GroupsByUserinfo": {
       "Default": "true",
       "Description": "Derive groups information from userinfo endpoint",
@@ -319,6 +335,10 @@
                   "Ref": "AWS::Region"
                 },
                 "\n",
+		"export DD_API_KEY=", { "Ref": "BanyanDDAPIKey" }, "\n",
+		"if [[ -n \"${DD_API_KEY}\" ]]; then\n",
+		"bash -c \"$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)\"\n",
+		"fi\n",
                 "rpm --import https://www.banyanops.com/onramp/repo/RPM-GPG-KEY-banyan\n",
                 "yum-config-manager --add-repo https://www.banyanops.com/onramp/repo\n",
                 "yum install -y ", {"Ref": "BanyanPackage"}, "\n",
@@ -350,6 +370,10 @@
                 "BANYAN_ACCESS_EVENT_KEY_LIMITING=", {"Ref":  "BanyanAccessEventKeyLimiting"},
                 " ",
                 "BANYAN_ACCESS_EVENT_KEY_EXPIRATION=", {"Ref":  "BanyanAccessEventKeyExpiration"},
+                " ",
+                "BANYAN_STATSD=", {"Ref":  "BanyanStatsd"},
+                " ",
+                "BANYAN_STATSD_ADDRESS=", {"Ref":  "BanyanStatsdAddress"},
                 " ",
                 "BANYAN_GROUPS_BY_USERINFO=", {"Ref":  "GroupsByUserinfo"},
                 " ",
