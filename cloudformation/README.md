@@ -33,6 +33,8 @@ A quick option to try the AccessTier CloudFormation deployment on a brand new VP
 
 You can then immediately launch the AccessTier Stack using CloudFormation.
 
+---
+
 ## DataDog metrics integration
 
 We now support sending real-time connection metrics to DataDog. Each instance of the Access Tier will send the following metrics:
