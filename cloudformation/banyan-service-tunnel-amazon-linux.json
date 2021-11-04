@@ -1,0 +1,571 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Banyan Elastic Access Tier",
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups" : [
+        {
+          "Label": { "default" : "Network Configuration" },
+          "Parameters": [ "VPCID", "PublicSubnets", "PrivateSubnets", "HealthCheckCidr", "CrossZoneEnabled"]
+        },
+        {
+          "Label": {"default": "Instance Configuration"},
+          "Parameters": ["MinInstances", "KeyName", "DefaultAmiId", "AmiId", "ManagementCidr"]
+        },
+        {
+          "Label": { "default": "Banyan Configuration" },
+          "Parameters": [
+            "BanyanClusterName",
+            "BanyanRefreshToken",
+            "BanyanSiteDomainNames",
+            "BanyanApiServer",
+            "BanyanPackage",
+            "BanyanHostTags",
+            "AccessEventCreditsLimiting",
+            "AccessEventCreditsMax",
+            "AccessEventCreditsInterval",
+            "AccessEventCreditsPerInterval",
+            "AccessEventKeyLimiting",
+            "AccessEventKeyExpiration",
+            "GroupsByUserinfo"
+          ]
+        }
+      ],
+      "ParameterLabels": {
+        "VPCID": { "default": "Which VPC should this Access Tier be deployed to?" }
+      }
+    }
+  },
+  "Parameters": {
+    "VPCID": {
+      "Description": "VPC must have internet access through an Internet Gateway",
+      "Type": "AWS::EC2::VPC::Id"
+    },
+    "PublicSubnets": {
+      "Default": "",
+      "Description": "Public subnets for the load balancer.",
+      "Type": "List<AWS::EC2::Subnet::Id>"
+    },
+    "PrivateSubnets": {
+      "Default": "",
+      "Description": "Private subnets for the instances.",
+      "Type": "List<AWS::EC2::Subnet::Id>"
+    },
+    "MinInstances": {
+      "Default": "2",
+      "Description": "Minimum number of instances. 1 instance per az (subnet) recommended",
+      "Type": "String"
+    },
+    "CrossZoneEnabled": {
+      "Default": "false",
+      "Description": "Enable to distribute traffic across all available instances",
+      "Type": "String",
+      "AllowedValues" : ["true", "false"]
+    },
+    "BanyanClusterName": {
+      "Description": "Name of the cluster/shield to join",
+      "AllowedPattern": "^[A-Za-z0-9_-]+",
+      "Type": "String",
+      "Default": "cluster1",
+      "MinLength": "1"
+    },
+    "BanyanRefreshToken": {
+      "Description": "Create a Refresh Token in the 'My Profile' section of the Banyan console",
+      "Type": "String",
+      "AllowedPattern": "^[A-Za-z0-9._-]+",
+      "MinLength": 200
+    },
+    "BanyanSiteDomainNames": {
+      "Default": "*",
+      "Description": "Alias or CNAME(s) that route traffic to this access tier. Separate multiple values with a comma. Spaces not allowed.",
+      "Type": "String",
+      "AllowedPattern": "^([\\S]+,?)*[^,]$"
+    },
+    "BanyanApiServer": {
+      "Description": "API Server",
+      "Type": "String",
+      "Default": "https://net.banyanops.com/api/v1",
+      "AllowedPattern": "^https://[^\\s]+"
+    },
+    "BanyanPackage": {
+      "Description": "Package name (e.g. banyan-netagent-1.5.0)",
+      "Type": "String",
+      "Default": "banyan-netagent",
+      "AllowedPattern": "^banyan-netagent[0-9.-]*"
+    },
+    "BanyanHostTags": {
+      "Description": "(optional) key=value, comma-separated host tag pairs. Spaces not allowed.",
+      "Type": "String",
+      "Default": "type=access_tier",
+      "AllowedPattern": "^([A-Za-z0-9_/-]+=[A-Za-z0-9_/-]*,?)*[^,]$"
+    },
+    "BanyanAccessEventCreditsLimiting": {
+      "Default": "true",
+      "Description": "Enable access event limiting by credits",
+      "Type": "String",
+      "AllowedValues": ["true", "false"]
+    },
+    "BanyanAccessEventCreditsMax": {
+      "Default": "5000",
+      "Description": "Max credits for access event credit limiting",
+      "Type": "String",
+      "AllowedPattern": "^[0-9]+$"
+    },
+    "BanyanAccessEventCreditsInterval": {
+      "Default": "1m",
+      "Description": "Time period for credit accrual",
+      "Type": "String",
+      "AllowedPattern": "^[a-z0-9]+$"
+    },
+    "BanyanAccessEventCreditsPerInterval": {
+      "Default": "5",
+      "Description": "Number of credits accrued each time period",
+      "Type": "String",
+      "AllowedPattern": "^[0-9]+$"
+    },
+    "BanyanAccessEventKeyLimiting": {
+      "Default": "true",
+      "Description": "Enable access event limiting by key",
+      "Type": "String",
+      "AllowedValues": ["true", "false"]
+    },
+    "BanyanAccessEventKeyExpiration": {
+      "Default": "9m",
+      "Description": "Key expiration time",
+      "Type": "String",
+      "AllowedPattern": "^[a-z0-9]+$"
+    },
+    "BanyanStatsd": {
+      "Default": "false",
+      "Description": "Turn on metrics collection using statsd",
+      "Type": "String",
+      "AllowedValues": ["true", "false"]
+    },
+    "BanyanStatsdAddress": {
+      "Default": "127.0.0.1:8125",
+      "Description": "Address to send statsd messages: 'hostname:port' for UDP; 'unix:///path/to/socket' for UDS",
+      "Type": "String"
+    },
+    "BanyanDDAPIKey": {
+      "Description": "(optional) Datadog API key",
+      "Type": "String",
+      "Default": ""
+    },
+    "GroupsByUserinfo": {
+      "Default": "true",
+      "Description": "Derive groups information from userinfo endpoint",
+      "Type": "String",
+      "AllowedValues": ["true", "false"]
+    },
+    "KeyName": {
+      "Description": "(optional) enables SSH on port 2222 for Access Tier instances",
+      "Type": "String",
+      "Default": ""
+    },
+    "HealthCheckCidr": {
+      "Description": "CIDR range to allow NLB HealthCheck from. Recommend using the VPC CIDR range",
+      "Type": "String",
+      "Default": "0.0.0.0/0",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "must be a valid IPv4 CIDR range of the form x.x.x.x/x.",
+      "MinLength": "1"
+    },
+    "ManagementCidr": {
+      "Description": "Allow SSH to this Access Tier on port 2222 from the specified CIDR range",
+      "Type": "String",
+      "Default": "0.0.0.0/0",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "must be a valid IPv4 CIDR range of the form x.x.x.x/x.",
+      "MinLength": "1"
+    },
+    "DefaultAmiId": {
+      "Description": "Default base AMI",
+      "Type":  "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+      "Default": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+    },
+    "AmiId": {
+      "Description": "(optional) leave blank to use latest Amazon Linux 2 AMI",
+      "Type":  "String",
+      "Default": ""
+    }
+  },
+  "Conditions": {
+    "UseCustomAmi": {
+      "Fn::Not": [
+        {"Fn::Equals": ["", {"Ref": "AmiId"}]}
+      ]
+    },
+    "HasKeyName": {
+      "Fn::Not": [
+        {"Fn::Equals": ["", {"Ref": "KeyName"}]}
+      ]}
+  },
+  "Resources": {
+    "BanyanSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Elastic Access Tier ingress traffic",
+        "VpcId": {"Ref": "VPCID"},
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "Description": "TCP Services secured by Banyan",
+            "FromPort": 8443,
+            "ToPort": 8443
+          },
+          {
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Web Services secured by Banyan",
+            "FromPort": 443,
+            "ToPort": 443
+          },
+          {
+            "IpProtocol": "tcp",
+            "CidrIp": {"Ref": "HealthCheckCidr"},
+            "Description": "Health Check used for AutoScaling",            
+            "FromPort": 9998,
+            "ToPort": 9998
+          },
+          {
+            "IpProtocol": "tcp",
+            "CidrIp": {"Ref":  "ManagementCidr"},
+            "Description": "SSH for Management & Troubleshooting",
+            "FromPort": 2222,
+            "ToPort": 2222
+          },
+          {
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "Description": "http traffic to be redirected to https ",
+            "FromPort": 80,
+            "ToPort": 80
+          },
+          {
+            "IpProtocol": "udp",
+            "CidrIp": "0.0.0.0/0",
+            "Description": "service tunnel traffic",
+            "FromPort": 51820,
+            "ToPort": 51820
+          }
+        ]
+      }
+    },
+    "BanyanNLB": {
+      "Type" : "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "Type": "network",
+        "IpAddressType": "ipv4",
+        "Scheme": "internet-facing",
+        "Subnets": {"Ref": "PublicSubnets"},
+        "LoadBalancerAttributes": [
+          {
+            "Key": "load_balancing.cross_zone.enabled",
+            "Value":  {"Ref": "CrossZoneEnabled"}
+          }
+        ]
+      }
+    },
+    "Listener443": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {"Ref": "BanyanTargetGroup443"}
+          }
+        ],
+        "LoadBalancerArn": {"Ref": "BanyanNLB"},
+        "Port": 443,
+        "Protocol": "TCP"
+      }
+    },
+    "Listener8443": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {"Ref": "BanyanTargetGroup8443"}
+          }
+        ],
+        "LoadBalancerArn": {"Ref": "BanyanNLB"},
+        "Port": 8443,
+        "Protocol": "TCP"
+      }
+    },
+    "Listener80": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {"Ref": "BanyanTargetGroup80"}
+          }
+        ],
+        "LoadBalancerArn": {"Ref": "BanyanNLB"},
+        "Port": 80,
+        "Protocol": "TCP"
+      }
+    },
+    "Listener51820": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {"Ref": "BanyanTargetGroup51820"}
+          }
+        ],
+        "LoadBalancerArn": {"Ref": "BanyanNLB"},
+        "Port": 51820,
+        "Protocol": "UDP"
+      }
+    },
+    "BanyanLaunchConfig": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "Properties": {
+        "KeyName": {"Fn::If": ["HasKeyName", {"Ref": "KeyName"}, {"Ref": "AWS::NoValue"}]},
+        "ImageId": {"Fn::If": ["UseCustomAmi", {"Ref": "AmiId"}, {"Ref": "DefaultAmiId"}]},
+        "SecurityGroups": [
+          {"Ref": "BanyanSecurityGroup"}
+        ],
+        "InstanceType": "m5.large",
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sdc",
+            "VirtualName": "ephemeral0"
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash -x\n",
+                "yum update -y && yum install -y aws-cfn-bootstrap jq\n",
+		"amazon-linux-extras install -y epel\n",
+		"curl -Lo /etc/yum.repos.d/wireguard.repo ",
+		"https://copr.fedorainfracloud.org/coprs/jdoss/wireguard/repo/epel-7/jdoss-wireguard-epel-7.repo\n",
+		"yum clean all\n",
+		"yum install -y wireguard-dkms wireguard-tools\n",
+		"/opt/aws/bin/cfn-init -v ",
+                "--resource BanyanLaunchConfig ",
+                "--configsets default ",
+                "--stack ",
+                {"Ref": "AWS::StackName"},
+                " ",
+                "--region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\n",
+		"export DD_API_KEY=", { "Ref": "BanyanDDAPIKey" }, "\n",
+		"if [[ -n \"${DD_API_KEY}\" ]]; then\n",
+		"bash -c \"$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)\"\n",
+		"fi\n",
+                "rpm --import https://www.banyanops.com/onramp/repo/RPM-GPG-KEY-banyan\n",
+                "yum-config-manager --add-repo https://www.banyanops.com/onramp/repo\n",
+                "yum install -y ", {"Ref": "BanyanPackage"}, "\n",
+                "cd /opt/banyan-packages\n",
+                "BANYAN_ACCESS_TIER=true",
+                " ",
+                "BANYAN_REDIRECT_TO_HTTPS=true",
+                " ",
+                "BANYAN_SITE_NAME=", {"Ref": "AWS::StackName"},
+                " ",
+                "BANYAN_SITE_ADDRESS=", { "Fn::GetAtt" : [ "BanyanNLB", "DNSName" ]},
+                " ",
+                "BANYAN_SITE_DOMAIN_NAMES=", {"Ref": "BanyanSiteDomainNames"},
+                " ",
+                "BANYAN_SITE_AUTOSCALE=true",
+                " ",
+                "BANYAN_API=", {"Ref": "BanyanApiServer"},
+                " ",
+                "BANYAN_HOST_TAGS=", {"Ref":  "BanyanHostTags"},
+                " ",
+                "BANYAN_ACCESS_EVENT_CREDITS_LIMITING=", {"Ref":  "BanyanAccessEventCreditsLimiting"},
+                " ",
+                "BANYAN_ACCESS_EVENT_CREDITS_MAX=", {"Ref":  "BanyanAccessEventCreditsMax"},
+                " ",
+                "BANYAN_ACCESS_EVENT_CREDITS_INTERVAL=", {"Ref":  "BanyanAccessEventCreditsInterval"},
+                " ",
+                "BANYAN_ACCESS_EVENT_CREDITS_PER_INTERVAL=", {"Ref":  "BanyanAccessEventCreditsPerInterval"},
+                " ",
+                "BANYAN_ACCESS_EVENT_KEY_LIMITING=", {"Ref":  "BanyanAccessEventKeyLimiting"},
+                " ",
+                "BANYAN_ACCESS_EVENT_KEY_EXPIRATION=", {"Ref":  "BanyanAccessEventKeyExpiration"},
+                " ",
+                "BANYAN_STATSD=", {"Ref":  "BanyanStatsd"},
+                " ",
+                "BANYAN_STATSD_ADDRESS=", {"Ref":  "BanyanStatsdAddress"},
+                " ",
+                "BANYAN_GROUPS_BY_USERINFO=", {"Ref":  "GroupsByUserinfo"},
+                " ",
+                "./install ",
+                {"Ref": "BanyanRefreshToken"},
+                " ",
+                {"Ref": "BanyanClusterName"},
+                "\n",
+                "echo 'Port 2222' >> /etc/ssh/sshd_config && /bin/systemctl restart sshd.service\n",
+                "/opt/aws/bin/cfn-signal -e $? ",
+                "--resource BanyanASG ",
+                "--stack ",
+                {"Ref": "AWS::StackName"},
+                " ",
+                "--region ",
+                {"Ref": "AWS::Region"},
+                "\n"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "BanyanTargetGroup443": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckPort": "9998",
+        "HealthCheckIntervalSeconds": "30",
+        "HealthyThresholdCount": "2",
+        "UnhealthyThresholdCount": "2",
+        "Port": 443,
+        "Protocol": "TCP",
+        "VpcId": {
+          "Ref": "VPCID"
+        }
+      }
+    },
+    "BanyanTargetGroup8443": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckPort": "9998",
+        "HealthCheckIntervalSeconds": "30",
+        "HealthyThresholdCount": "2",
+        "UnhealthyThresholdCount": "2",
+        "Port": 8443,
+        "Protocol": "TCP",
+        "VpcId": {
+          "Ref": "VPCID"
+        }
+      }
+    },
+    "BanyanTargetGroup80": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckPort": "9998",
+        "HealthCheckIntervalSeconds": "30",
+        "HealthyThresholdCount": "2",
+        "UnhealthyThresholdCount": "2",
+        "Port": 80,
+        "Protocol": "TCP",
+        "VpcId": {
+          "Ref": "VPCID"
+        }
+      }
+    },
+    "BanyanTargetGroup51820": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckPort": "9998",
+        "HealthCheckIntervalSeconds": "30",
+        "HealthyThresholdCount": "2",
+        "UnhealthyThresholdCount": "2",
+        "Port": 51820,
+        "Protocol": "UDP",
+        "VpcId": {
+          "Ref": "VPCID"
+        }
+      }
+    },
+    "BanyanCPUPolicy":{
+      "Type":"AWS::AutoScaling::ScalingPolicy",
+      "Properties":{
+        "AutoScalingGroupName":{
+          "Ref":"BanyanASG"
+        },
+        "PolicyType":"TargetTrackingScaling",
+        "TargetTrackingConfiguration":{
+          "PredefinedMetricSpecification":{
+            "PredefinedMetricType":"ASGAverageCPUUtilization"
+          },
+          "TargetValue": "80"
+        }
+      }
+    },
+    "BanyanASG": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "LaunchConfigurationName": {
+          "Ref": "BanyanLaunchConfig"
+        },
+        "DesiredCapacity": {
+          "Ref": "MinInstances"
+        },
+        "MinSize": {
+          "Ref": "MinInstances"
+        },
+        "MaxSize": "10",
+        "VPCZoneIdentifier": {
+          "Ref": "PrivateSubnets"
+        },
+        "HealthCheckGracePeriod": "300",
+        "HealthCheckType": "ELB",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {"Ref": "AWS::StackName"},
+                  "BanyanHost"
+                ]
+              ]
+            },
+            "PropagateAtLaunch": "true"
+          },
+          {
+            "Key": "Provider",
+            "Value": "BanyanOps",
+            "PropagateAtLaunch": "true"
+          }
+        ],
+        "TargetGroupARNs": [
+          {"Ref": "BanyanTargetGroup443"},
+          {"Ref": "BanyanTargetGroup8443"},
+          {"Ref": "BanyanTargetGroup80"},
+          {"Ref": "BanyanTargetGroup51820"}
+        ]
+      },
+      "CreationPolicy": {
+        "ResourceSignal": {
+          "Count": "1",
+          "Timeout": "PT5M"
+        }
+      },
+      "UpdatePolicy": {
+        "AutoScalingRollingUpdate": {
+          "MaxBatchSize": "2",
+          "MinInstancesInService": "2",
+          "MinSuccessfulInstancesPercent": "100",
+          "PauseTime": "PT5M",
+          "WaitOnResourceSignals": "true"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "LoadBalancerCanonicalHostedZoneID": {
+      "Value": { "Fn::GetAtt": [ "BanyanNLB", "CanonicalHostedZoneID" ]}
+    },
+    "LoadBalancer": {
+      "Value": { "Fn::GetAtt": [ "BanyanNLB", "DNSName" ]}
+    }
+  }
+}
