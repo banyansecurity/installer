@@ -15,19 +15,11 @@
         {
           "Label": { "default": "Banyan Configuration" },
           "Parameters": [
+            "BanyanApiServer",
             "BanyanClusterName",
             "BanyanRefreshToken",
-            "BanyanSiteDomainNames",
-            "BanyanApiServer",
-            "BanyanPackage",
-            "BanyanHostTags",
-            "AccessEventCreditsLimiting",
-            "AccessEventCreditsMax",
-            "AccessEventCreditsInterval",
-            "AccessEventCreditsPerInterval",
-            "AccessEventKeyLimiting",
-            "AccessEventKeyExpiration",
-            "GroupsByUserinfo"
+	    "BanyanStickiness",
+            "BanyanSiteDomainNames"
           ]
         }
       ],
@@ -92,6 +84,12 @@
       "Type": "String",
       "Default": "banyan-netagent",
       "AllowedPattern": "^banyan-netagent[0-9.-]*"
+    },
+    "BanyanStickiness": {
+      "Default": "false",
+      "Description": "Enable sticky sessions in load balancer target groups",
+      "Type": "String",
+      "AllowedValues" : ["true", "false"]
     },
     "BanyanHostTags": {
       "Description": "(optional) key=value, comma-separated host tag pairs. Spaces not allowed.",
@@ -409,7 +407,13 @@
         "Protocol": "TCP",
         "VpcId": {
           "Ref": "VPCID"
-        }
+        },
+        "TargetGroupAttributes": [
+          {
+            "Key": "stickiness.enabled",
+            "Value":  {"Ref": "BanyanStickiness"}
+          }
+	]
       }
     },
     "BanyanTargetGroup8443": {
@@ -424,7 +428,13 @@
         "Protocol": "TCP",
         "VpcId": {
           "Ref": "VPCID"
-        }
+        },
+        "TargetGroupAttributes": [
+          {
+            "Key": "stickiness.enabled",
+            "Value":  {"Ref": "BanyanStickiness"}
+          }
+	]
       }
     },
     "BanyanTargetGroup80": {
@@ -439,7 +449,13 @@
         "Protocol": "TCP",
         "VpcId": {
           "Ref": "VPCID"
-        }
+        },
+        "TargetGroupAttributes": [
+          {
+            "Key": "stickiness.enabled",
+            "Value":  {"Ref": "BanyanStickiness"}
+          }
+	]
       }
     },
     "BanyanCPUPolicy":{
