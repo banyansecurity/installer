@@ -1,4 +1,4 @@
-# Installer - AccessTier - AWS - Deploy using CloudFormation
+# Deploy AccessTier using AWS CloudFormation
 
 ### Prerequisites
 

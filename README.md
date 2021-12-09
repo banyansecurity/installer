@@ -1,11 +1,6 @@
-## Install the Banyan Enforcement Component, Netagent, in AccessTier or HostAgent Mode
+# Banyan Access Tier Installer
 
-This repo provides instructions and examples for automated deployments of Banyan's Enforcement Component, Netagent. 
-
-Netagent can run in HostAgent or AccessTier mode using various orchestration platforms.
-
-
-### AccessTier Mode
+Instructions and examples for automated deployments of the Banyan AccessTier.
 
 **[AWS CloudFormation](cloudformation)**
 
