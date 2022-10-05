@@ -62,10 +62,10 @@
       "AllowedPattern": "^https://[^\\s]+"
     },
     "BanyanPackage": {
-      "Description": "banyan-netagent, or banyan-netagent=version, e.g. banyan-netagent=2.0.0",
+      "Description": "banyan-netagent2, or banyan-netagent2=[VERSION], e.g. banyan-netagent2=2.0.0",
       "Type": "String",
-      "Default": "banyan-netagent",
-      "AllowedPattern": "^banyan-netagent[=0-9.a-z-]*"
+      "Default": "banyan-netagent2",
+      "AllowedPattern": "^banyan-netagent2[=0-9.a-z-]*"
     },
     "BanyanDDAPIKey": {
       "Description": "(optional) Datadog API key",
