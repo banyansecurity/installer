@@ -14,12 +14,12 @@ Ensure that your VPC has an Internet Gateway attached and a Public Subnet where 
 
 Navigate in the AWS Console to CloudFormation > Create stack.
 
-Upload the file `banyan-access-tier-ubuntu.json` or `banyan-access-tier-amazon-linux.json`.
+Upload the `banyan-elastic-access-tier.json` file.
 
 
 ### Step 3 - Enter the Parameters required and deploy AccessTier
 
-Provide a `Stack name` (which will also be the access tier name), and specify the `VPC` into which the AccessTier should be deployed as well other relevant details.
+Provide a `Stack name`, specify the `VPC` into which the AccessTier should be deployed as well other relevant details.
 
 Click Start to deploy the AccessTier.
 
@@ -37,8 +37,7 @@ You can then immediately launch the AccessTier Stack using CloudFormation.
 
 ## DataDog metrics integration
 
-Real-time connection metrics can be sent to DataDog (enabled through command center access tier settings).
-Each instance of the Access Tier will send the following metrics:
+We now support sending real-time connection metrics to DataDog. Each instance of the Access Tier will send the following metrics:
 
 | Name | Description |
 | :--- | :---------- |
@@ -53,6 +52,6 @@ The metrics are tagged with `hostname`, `port`, `service`, and `site_name` so yo
 
 Support for other protocols (e.g. statsd, prometheus) and monitoring systems will be added in the future.
 
-To enable the DataDog agent, paste your [DataDog API Key][] into the parameter `BanyanDDAPIKey`.
+To enable DataDog integration, paste your [DataDog API Key][] into the paramter `BanyanDDAPIKey` and re-run the stack.
 
 [DataDog API Key]: https://docs.datadoghq.com/account_management/api-app-keys/#add-an-api-key-or-client-token
