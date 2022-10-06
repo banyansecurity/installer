@@ -136,7 +136,7 @@
           {
             "IpProtocol": "tcp",
             "CidrIp": {"Ref": "HealthCheckCidr"},
-            "Description": "Health Check used for AutoScaling",            
+            "Description": "Health Check used for AutoScaling",
             "FromPort": 9998,
             "ToPort": 9998
           },
