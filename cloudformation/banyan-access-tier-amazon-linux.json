@@ -5,19 +5,16 @@
     "AWS::CloudFormation::Interface": {
       "ParameterGroups" : [
         {
+          "Label": { "default": "Banyan Configuration" },
+          "Parameters": ["ApiKeySecret", "CommandCenterURL", "BanyanPackage"]
+        },
+        {
           "Label": { "default" : "Network Configuration" },
-          "Parameters": [ "VPCID", "PublicSubnets", "PrivateSubnets", "HealthCheckCidr", "CrossZoneEnabled"]
+          "Parameters": ["VPCID", "PublicSubnets", "PrivateSubnets", "HealthCheckCidr", "CrossZoneEnabled"]
         },
         {
           "Label": {"default": "Instance Configuration"},
-          "Parameters": ["MinInstances", "KeyName", "DefaultAmiId", "AmiId", "ManagementCidr"]
-        },
-        {
-          "Label": { "default": "Banyan Configuration" },
-          "Parameters": [
-            "APIKeySecret",
-            "CommandCenterURL"
-          ]
+          "Parameters": ["KeyName", "DatadogApiKey", "MinInstances", "DefaultAmiId", "AmiId", "ManagementCidr"]
         }
       ],
       "ParameterLabels": {
@@ -49,7 +46,7 @@
       "Type": "String",
       "AllowedValues" : ["true", "false"]
     },
-    "APIKeySecret": {
+    "ApiKeySecret": {
       "Description": "Create an API Key in the Admin Settings section of the Banyan console. Alternatively, create a Refresh Token in the 'My Profile' section of the Banyan console",
       "Type": "String",
       "AllowedPattern": "^[A-Za-z0-9._-]+",
@@ -67,7 +64,7 @@
       "Default": "banyan-netagent2",
       "AllowedPattern": "^banyan-netagent2[a-z0-9._-]*"
     },
-    "BanyanDDAPIKey": {
+    "DatadogApiKey": {
       "Description": "(optional) Datadog API key",
       "Type": "String",
       "Default": ""
@@ -270,7 +267,7 @@
                 "--configsets default ",
                 "--stack ", {"Ref": "AWS::StackName"}, " ",
                 "--region ", { "Ref": "AWS::Region"}, "\n",
-                "export DD_API_KEY=", { "Ref": "BanyanDDAPIKey" }, "\n",
+                "export DD_API_KEY=", { "Ref": "DatadogApiKey" }, "\n",
                 "if [[ -n \"${DD_API_KEY}\" ]]; then\n",
                 "bash -c \"$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)\"\n",
                 "fi\n",
@@ -280,7 +277,7 @@
                 "cd /opt/banyan-packages\n",
                 "ACCESS_TIER_NAME=", {"Ref": "AWS::StackName"}, " ",
                 "ACCESS_TIER_PUBLIC_ADDRESS=", { "Fn::GetAtt" : [ "BanyanNLB", "DNSName" ]}, " ",
-		"API_KEY_SECRET=", {"Ref": "APIKeySecret"}, " ",
+		"API_KEY_SECRET=", {"Ref": "ApiKeySecret"}, " ",
                 "COMMAND_CENTER_URL=", {"Ref": "CommandCenterURL"}, " ",
                 "./install\n",
                 "echo 'Port 2222' >> /etc/ssh/sshd_config && /bin/systemctl restart sshd.service\n",
