@@ -14,7 +14,7 @@ Ensure that your VPC has an Internet Gateway attached and a Public Subnet where 
 
 Navigate in the AWS Console to CloudFormation > Create stack.
 
-Upload the file `banyan-access-tier-ubuntu.json` or `banyan-access-tier-amazon-linux.json`.
+Upload the file `banyan-access-tier-v2-ubuntu.json` or `banyan-access-tier-v2-amazon-linux.json`.
 
 
 ### Step 3 - Enter the Parameters required and deploy AccessTier

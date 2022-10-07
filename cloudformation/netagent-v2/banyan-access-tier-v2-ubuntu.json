@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Banyan Elastic Access Tier",
+  "Description": "Banyan Elastic Access Tier v2",
   "Metadata": {
     "AWS::CloudFormation::Interface": {
       "ParameterGroups" : [
@@ -59,10 +59,10 @@
       "AllowedPattern": "^https://[^\\s]+"
     },
     "BanyanPackage": {
-      "Description": "banyan-netagent2, or banyan-netagent2-[version], e.g., banyan-netagent2-2.0.0",
+      "Description": "banyan-netagent2, or banyan-netagent2=[VERSION], e.g. banyan-netagent2=2.0.0",
       "Type": "String",
       "Default": "banyan-netagent2",
-      "AllowedPattern": "^banyan-netagent2[a-z0-9._-]*"
+      "AllowedPattern": "^banyan-netagent2[=0-9.a-z-]*"
     },
     "DatadogApiKey": {
       "Description": "(optional) Datadog API key",
@@ -91,12 +91,12 @@
       "MinLength": "1"
     },
     "DefaultAmiId": {
-      "Description": "Default base AMI",
+      "Description": "Default base AMI - Ubuntu 20.04",
       "Type":  "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
-      "Default": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+      "Default": "/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id"
     },
     "AmiId": {
-      "Description": "(optional) leave blank to use latest Amazon Linux 2 AMI",
+      "Description": "(optional) leave blank to use Ubuntu 20.04 AMI",
       "Type":  "String",
       "Default": ""
     }
@@ -256,24 +256,21 @@
               "",
               [
                 "#!/bin/bash -x\n",
-                "yum update -y && yum install -y aws-cfn-bootstrap jq\n",
-                "amazon-linux-extras install -y epel\n",
-                "curl -Lo /etc/yum.repos.d/wireguard.repo ",
-                "https://copr.fedorainfracloud.org/coprs/jdoss/wireguard/repo/epel-7/jdoss-wireguard-epel-7.repo\n",
-                "yum clean all\n",
-                "yum install -y wireguard-dkms wireguard-tools\n",
+                "apt-get update -y\n",
+                "mkdir -p /opt/aws/bin && wget https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz\n",
+                "python3 -m easy_install --script-dir /opt/aws/bin aws-cfn-bootstrap-py3-latest.tar.gz\n",
                 "/opt/aws/bin/cfn-init -v ",
                 "--resource BanyanLaunchConfig ",
                 "--configsets default ",
                 "--stack ", {"Ref": "AWS::StackName"}, " ",
-                "--region ", { "Ref": "AWS::Region"}, "\n",
+                "--region ", {"Ref": "AWS::Region"}, "\n",
                 "export DD_API_KEY=", { "Ref": "DatadogApiKey" }, "\n",
                 "if [[ -n \"${DD_API_KEY}\" ]]; then\n",
                 "bash -c \"$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)\"\n",
                 "fi\n",
-                "rpm --import https://www-stage.bnntest.com/onramp/repo/RPM-GPG-KEY-banyan\n",
-                "yum-config-manager --add-repo https://www-stage.bnntest.com/onramp/repo\n",
-                "yum install -y ", {"Ref": "BanyanPackage"}, "\n",
+                "curl https://www-stage.bnntest.com/onramp/deb-repo/banyan.key | apt-key add -\n",
+                "apt-add-repository \"deb https://www-stage.bnntest.com/onramp/deb-repo xenial main\"\n",
+                "apt install -y ", {"Ref": "BanyanPackage"}, "\n",
                 "cd /opt/banyan-packages\n",
                 "ACCESS_TIER_NAME=", {"Ref": "AWS::StackName"}, " ",
                 "ACCESS_TIER_PUBLIC_ADDRESS=", { "Fn::GetAtt" : [ "BanyanNLB", "DNSName" ]}, " ",
