@@ -91,12 +91,12 @@
       "MinLength": "1"
     },
     "DefaultAmiId": {
-      "Description": "Default base AMI - Ubuntu 20.04",
+      "Description": "Default base AMI - Ubuntu 22.04",
       "Type":  "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
-      "Default": "/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id"
+      "Default": "/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id"
     },
     "AmiId": {
-      "Description": "(optional) leave blank to use Ubuntu 20.04 AMI",
+      "Description": "(optional) leave blank to use Ubuntu 22.04 AMI",
       "Type":  "String",
       "Default": ""
     }
