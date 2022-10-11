@@ -47,7 +47,7 @@
       "AllowedValues" : ["true", "false"]
     },
     "ApiKeySecret": {
-      "Description": "Create an API Key in the Admin Settings section of the Banyan console. Alternatively, create a Refresh Token in the 'My Profile' section of the Banyan console",
+      "Description": "Create an API Key with 'access_tier' scope in the Admin Settings section of the Banyan console",
       "Type": "String",
       "AllowedPattern": "^[A-Za-z0-9._-]+",
       "MinLength": 32
