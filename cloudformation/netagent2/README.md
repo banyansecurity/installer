@@ -19,7 +19,8 @@ Upload the file `banyan-access-tier-v2-ubuntu.json` or `banyan-access-tier-v2-am
 
 ### Step 3 - Enter the Parameters required and deploy AccessTier
 
-Provide a `Stack name` (which will also be the access tier name), and specify the `VPC` into which the AccessTier should be deployed as well other relevant details.
+Create an Access Tier in the Command Center (console UI or API).
+In this template, use the access tier name as the `Stack name`, and specify the `VPC` into which the AccessTier should be deployed as well other relevant details.
 
 Click Start to deploy the AccessTier.
 
