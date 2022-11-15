@@ -7,3 +7,6 @@ netagent-0*
 
 # ansible
 *.retry
+
+# macOS
+.DS_Store
