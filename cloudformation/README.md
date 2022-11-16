@@ -14,7 +14,7 @@ Ensure that your VPC has all of the following:
 For a new VPC, a quick option to try the Access Tier CloudFormation deployment is to use the `network/banyan-network-stack.json` stack
 to provision all the requisite AWS Networking.
 
-### Choose the AccessTier stack to deploy
+### Choose the Access Tier stack to deploy
 
 To deploy Access Tier using the latest `netagent-2.x.x`, use the stacks in the `netagent2` folder.
 

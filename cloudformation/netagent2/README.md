@@ -17,7 +17,7 @@ Ensure that your VPC has an Internet Gateway attached and a Public Subnet where 
 Create an Access Tier in the Command Center (console UI or API).
 
 
-### Step 3 - Create the AccessTier Stack using CloudFormation in the AWS Console
+### Step 3 - Create the Access Tier Stack using CloudFormation in the AWS Console
 
 Navigate in the AWS Console to CloudFormation > Create stack.
 
