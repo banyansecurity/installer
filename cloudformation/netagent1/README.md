@@ -1,4 +1,6 @@
-# Deploy AccessTier using AWS CloudFormation
+# Deploy Access Tier with Netagent v1 using AWS CloudFormation
+
+> :warning: **Note: Netagent v2 has been released. This article describes installation and configuration of an Access Tier with legacy Netagent v1. To install the latest Access Tier, use the [latest v2 installation guides](../netagent2).**
 
 ### Prerequisites
 
@@ -10,7 +12,7 @@
 Ensure that your VPC has an Internet Gateway attached and a Public Subnet where you can deploy the AccessTier.
 
 
-### Step 2 - Create the AccessTier Stack using CloudFormation in the AWS Console
+### Step 2 - Create the Access Tier Stack using CloudFormation in the AWS Console
 
 Navigate in the AWS Console to CloudFormation > Create stack.
 

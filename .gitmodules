@@ -1,6 +1,27 @@
-[submodule "terraform/terraform-aws-banyan-network"]
-	path = terraform/terraform-aws-banyan-network
+[submodule "terraform/access_tier/network/aws/terraform-aws-banyan-network"]
+	path = terraform/access_tier/network/aws/terraform-aws-banyan-network
 	url = https://github.com/banyansecurity/terraform-aws-banyan-network
-[submodule "terraform/terraform-aws-banyan-accesstier"]
-	path = terraform/terraform-aws-banyan-accesstier
+[submodule "terraform/access_tier/netagent1/aws/terraform-aws-banyan-accesstier"]
+	path = terraform/access_tier/netagent1/aws/terraform-aws-banyan-accesstier
 	url = https://github.com/banyansecurity/terraform-aws-banyan-accesstier
+[submodule "terraform/access_tier/netagent1/aws/terraform-aws-banyan-accesstier-ubuntu"]
+	path = terraform/access_tier/netagent1/aws/terraform-aws-banyan-accesstier-ubuntu
+	url = https://github.com/banyansecurity/terraform-aws-banyan-accesstier-ubuntu
+[submodule "terraform/access_tier/netagent1/gcp/terraform-google-banyan-accesstier"]
+	path = terraform/access_tier/netagent1/gcp/terraform-google-banyan-accesstier
+	url = https://github.com/banyansecurity/terraform-google-banyan-accesstier
+[submodule "terraform/connector/aws/terraform-aws-banyan-connector"]
+	path = terraform/connector/aws/terraform-aws-banyan-connector
+	url = https://github.com/banyansecurity/terraform-aws-banyan-connector
+[submodule "terraform/connector/azure/terraform-azure-banyan-connector"]
+	path = terraform/connector/azure/terraform-azure-banyan-connector
+	url = https://github.com/banyansecurity/terraform-azure-banyan-connector
+[submodule "terraform/connector/gcp/terraform-google-banyan-connector"]
+	path = terraform/connector/gcp/terraform-google-banyan-connector
+	url = https://github.com/banyansecurity/terraform-google-banyan-connector
+[submodule "terraform/access_tier/netagent2/aws/terraform-aws-banyan-accesstier2"]
+	path = terraform/access_tier/netagent2/aws/terraform-aws-banyan-accesstier2
+	url = https://github.com/banyansecurity/terraform-aws-banyan-accesstier2
+[submodule "terraform/access_tier/netagent2/gcp/terraform-google-banyan-accesstier2"]
+	path = terraform/access_tier/netagent2/gcp/terraform-google-banyan-accesstier2
+	url = https://github.com/banyansecurity/terraform-google-banyan-accesstier2
