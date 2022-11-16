@@ -1,4 +1,6 @@
-# Deploy AccessTier using AWS CloudFormation
+# Deploy Access Tier with Netagent v2 using AWS CloudFormation
+
+> :warning: **Note: Netagent v2 has been released, simplifying the process of installing and configuring an Access Tier. If you need to use Netagent v1, use the [legacy v1 guides](../netagent1).**
 
 ### Prerequisites
 
@@ -10,16 +12,17 @@
 Ensure that your VPC has an Internet Gateway attached and a Public Subnet where you can deploy the AccessTier.
 
 
-### Step 2 - Create the AccessTier Stack using CloudFormation in the AWS Console
+### Step 2 - Register your Access Tier in the Banyan Command Center
+
+Create an Access Tier in the Command Center (console UI or API).
+
+
+### Step 3 - Create the AccessTier Stack using CloudFormation in the AWS Console
 
 Navigate in the AWS Console to CloudFormation > Create stack.
 
 Upload the file `banyan-access-tier-v2-ubuntu.json` or `banyan-access-tier-v2-amazon-linux.json`.
 
-
-### Step 3 - Enter the Parameters required and deploy AccessTier
-
-Create an Access Tier in the Command Center (console UI or API).
 In this template, use the access tier name as the `Stack name`, and specify the `VPC` into which the AccessTier should be deployed as well other relevant details.
 
 Click Start to deploy the AccessTier.

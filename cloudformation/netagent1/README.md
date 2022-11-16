@@ -1,4 +1,6 @@
-# Deploy AccessTier using AWS CloudFormation
+# Deploy Access Tier with Netagent v1 using AWS CloudFormation
+
+> :warning: **Note: Netagent v2 has been released. This article describes installation and configuration of an Access Tier with legacy Netagent v1. To install the latest Access Tier, use the [latest v2 installation guides](../netagent2).**
 
 ### Prerequisites
 
