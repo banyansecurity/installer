@@ -337,7 +337,7 @@
                 "\n",
 		"export DD_API_KEY=", { "Ref": "BanyanDDAPIKey" }, "\n",
 		"if [[ -n \"${DD_API_KEY}\" ]]; then\n",
-		"bash -c \"$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)\"\n",
+		"DD_SITE=\"datadoghq.com\" bash -c \"$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)\"\n",
 		"fi\n",
                 "rpm --import https://www.banyanops.com/onramp/repo/RPM-GPG-KEY-banyan\n",
                 "yum-config-manager --add-repo https://www.banyanops.com/onramp/repo\n",
