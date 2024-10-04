@@ -271,6 +271,8 @@
                 "if [[ -n \"${DD_API_KEY}\" ]]; then\n",
 		"DD_SITE=\"datadoghq.com\" bash -c \"$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)\"\n",
                 "fi\n",
+		"mkdir -p /opt/banyan/\n",
+		"cd /opt/banyan",
                 "curl -Lo netagent.tar.gz https://www.banyanops.com/netting/netagent-",{"Ref": "BanyanPackageVersion"},".tar.gz\n",
                 "tar zxf netagent.tar.gz\n",
                 "cd netagent/\n",
