@@ -279,7 +279,7 @@
                 "  VERSION=latest\n",
                 "fi\n",
                 "mkdir -p /opt/banyan-packages/\n",
-				"cd /opt/banyan-packages\n",
+		"cd /opt/banyan-packages\n",
                 "curl -Lo netagent-${VERSION}.tar.gz https://www.banyanops.com/netting/netagent-${VERSION}.tar.gz\n",
                 "tar zxf netagent-${VERSION}.tar.gz\n",
                 "cd netagent-*\n",
