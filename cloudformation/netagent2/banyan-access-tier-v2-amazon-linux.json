@@ -287,7 +287,7 @@
                 "echo \"command_center_url: ", {"Ref": "CommandCenterURL"}, "\n",
                 "api_key_secret: ", {"Ref": "ApiKeySecret"}, "\n",
                 "access_tier_name: '", {"Ref": "AWS::StackName"},"'\" > config.yaml\n",
-                "sudo ./setup-netagent.sh\n",
+                "./setup-netagent.sh\n",
                 "echo 'Port 2222' >> /etc/ssh/sshd_config && /bin/systemctl restart sshd.service\n",
                 "/opt/aws/bin/cfn-signal -e $? ",
                 "--resource BanyanASG ",
