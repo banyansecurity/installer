@@ -59,10 +59,10 @@
       "AllowedPattern": "^https://[^\\s]+"
     },
     "BanyanPackage": {
-      "Description": "latest or or specific netagent version, e.g., 2.8.11, Would accept banyan-netagent2, or banyan-netagent2-[version] to have backward compatibility",
+      "Description": "banyan-netagent2, or banyan-netagent2-[version], e.g., banyan-netagent2-2.0.0",
       "Type": "String",
-      "Default": "latest",
-      "AllowedPattern": "^[a-z0-9._-]*"
+      "Default": "banyan-netagent2",
+      "AllowedPattern": "^banyan-netagent2[a-z0-9._-]*"
     },
     "DatadogApiKey": {
       "Description": "(optional) Datadog API key",
@@ -273,11 +273,10 @@
                 "fi\n",
                 "# Determine the version\n",
                 "export VERSION=\"", {"Ref": "BanyanPackage"}, "\"\n",
-                "if [[ \"$VERSION\" == banyan-netagent2 ]]; then\n",
-                "  VERSION=latest\n",
-                "fi\n",
                 "if [[ \"$VERSION\" == banyan-netagent2-* ]]; then\n",
                 "  VERSION=${VERSION#banyan-netagent2-}\n",
+                "else\n",
+                "  VERSION=latest\n",
                 "fi\n",
                 "mkdir -p /opt/banyan-packages/\n",
 				"cd /opt/banyan-packages\n",
