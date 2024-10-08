@@ -282,7 +282,7 @@
 		"cd /opt/banyan-packages\n",
                 "curl -Lo netagent-${VERSION}.tar.gz https://www.banyanops.com/netting/netagent-${VERSION}.tar.gz\n",
                 "tar zxf netagent-${VERSION}.tar.gz\n",
-                "cd netagent-*\n",
+                "cd $(tar tf netagent-${VERSION}.tar.gz | awk '{print substr($1, 1, length($1)-1); exit}')\n",
                 "echo \"command_center_url: ", {"Ref": "CommandCenterURL"}, "\n",
                 "api_key_secret: ", {"Ref": "ApiKeySecret"}, "\n",
                 "access_tier_name: '", {"Ref": "AWS::StackName"},"'\" > config.yaml\n",
