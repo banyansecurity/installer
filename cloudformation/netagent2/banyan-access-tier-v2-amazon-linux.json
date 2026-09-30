@@ -3,22 +3,47 @@
   "Description": "Banyan Elastic Access Tier v2 (Amazon Linux 2023)",
   "Metadata": {
     "AWS::CloudFormation::Interface": {
-      "ParameterGroups" : [
+      "ParameterGroups": [
         {
-          "Label": { "default": "Banyan Configuration" },
-          "Parameters": ["ApiKeySecret", "CommandCenterURL", "BanyanPackage"]
+          "Label": {
+            "default": "Banyan Configuration"
+          },
+          "Parameters": [
+            "ApiKeySecret",
+            "CommandCenterURL",
+            "BanyanPackage"
+          ]
         },
         {
-          "Label": { "default" : "Network Configuration" },
-          "Parameters": ["VPCID", "PublicSubnets", "PrivateSubnets", "HealthCheckCidr", "CrossZoneEnabled"]
+          "Label": {
+            "default": "Network Configuration"
+          },
+          "Parameters": [
+            "VPCID",
+            "PublicSubnets",
+            "PrivateSubnets",
+            "HealthCheckCidr",
+            "CrossZoneEnabled"
+          ]
         },
         {
-          "Label": {"default": "Instance Configuration"},
-          "Parameters": ["KeyName", "DatadogApiKey", "MinInstances", "DefaultAmiId", "AmiId", "ManagementCidr"]
+          "Label": {
+            "default": "Instance Configuration"
+          },
+          "Parameters": [
+            "KeyName",
+            "DatadogApiKey",
+            "MinInstances",
+            "DefaultAmiId",
+            "AmiId",
+            "ManagementCidr"
+          ]
         }
       ],
       "ParameterLabels": {
-        "VPCID": { "default": "Which VPC should this Access Tier be deployed to?" }
+        "VPCID": {
+          "default": "Which VPC should this Access Tier be deployed to?"
+        }
       }
     }
   },
@@ -44,13 +69,17 @@
       "Default": "false",
       "Description": "Enable to distribute traffic across all available instances",
       "Type": "String",
-      "AllowedValues" : ["true", "false"]
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
     },
     "ApiKeySecret": {
       "Description": "Create an API Key with 'access_tier' scope in the Admin Settings section of the Banyan console",
       "Type": "String",
       "AllowedPattern": "^[A-Za-z0-9._-]+",
-      "MinLength": 32
+      "MinLength": 32,
+      "NoEcho": true
     },
     "CommandCenterURL": {
       "Description": "Command Center URL",
@@ -92,32 +121,49 @@
     },
     "DefaultAmiId": {
       "Description": "Default base AMI (Amazon Linux 2023)",
-      "Type":  "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+      "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
       "Default": "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
     },
     "AmiId": {
       "Description": "(optional) leave blank to use latest Amazon Linux 2023 AMI",
-      "Type":  "String",
+      "Type": "String",
       "Default": ""
     }
   },
   "Conditions": {
     "UseCustomAmi": {
       "Fn::Not": [
-        {"Fn::Equals": ["", {"Ref": "AmiId"}]}
+        {
+          "Fn::Equals": [
+            "",
+            {
+              "Ref": "AmiId"
+            }
+          ]
+        }
       ]
     },
     "HasKeyName": {
       "Fn::Not": [
-        {"Fn::Equals": ["", {"Ref": "KeyName"}]}
-      ]}
+        {
+          "Fn::Equals": [
+            "",
+            {
+              "Ref": "KeyName"
+            }
+          ]
+        }
+      ]
+    }
   },
   "Resources": {
     "BanyanSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
         "GroupDescription": "Elastic Access Tier ingress traffic",
-        "VpcId": {"Ref": "VPCID"},
+        "VpcId": {
+          "Ref": "VPCID"
+        },
         "SecurityGroupIngress": [
           {
             "IpProtocol": "tcp",
@@ -135,14 +181,18 @@
           },
           {
             "IpProtocol": "tcp",
-            "CidrIp": {"Ref": "HealthCheckCidr"},
+            "CidrIp": {
+              "Ref": "HealthCheckCidr"
+            },
             "Description": "Health Check used for AutoScaling",
             "FromPort": 9998,
             "ToPort": 9998
           },
           {
             "IpProtocol": "tcp",
-            "CidrIp": {"Ref":  "ManagementCidr"},
+            "CidrIp": {
+              "Ref": "ManagementCidr"
+            },
             "Description": "SSH for Management & Troubleshooting",
             "FromPort": 2222,
             "ToPort": 2222
@@ -165,16 +215,20 @@
       }
     },
     "BanyanNLB": {
-      "Type" : "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
       "Properties": {
         "Type": "network",
         "IpAddressType": "ipv4",
         "Scheme": "internet-facing",
-        "Subnets": {"Ref": "PublicSubnets"},
+        "Subnets": {
+          "Ref": "PublicSubnets"
+        },
         "LoadBalancerAttributes": [
           {
             "Key": "load_balancing.cross_zone.enabled",
-            "Value":  {"Ref": "CrossZoneEnabled"}
+            "Value": {
+              "Ref": "CrossZoneEnabled"
+            }
           }
         ]
       }
@@ -185,10 +239,14 @@
         "DefaultActions": [
           {
             "Type": "forward",
-            "TargetGroupArn": {"Ref": "BanyanTargetGroup443"}
+            "TargetGroupArn": {
+              "Ref": "BanyanTargetGroup443"
+            }
           }
         ],
-        "LoadBalancerArn": {"Ref": "BanyanNLB"},
+        "LoadBalancerArn": {
+          "Ref": "BanyanNLB"
+        },
         "Port": 443,
         "Protocol": "TCP"
       }
@@ -199,10 +257,14 @@
         "DefaultActions": [
           {
             "Type": "forward",
-            "TargetGroupArn": {"Ref": "BanyanTargetGroup8443"}
+            "TargetGroupArn": {
+              "Ref": "BanyanTargetGroup8443"
+            }
           }
         ],
-        "LoadBalancerArn": {"Ref": "BanyanNLB"},
+        "LoadBalancerArn": {
+          "Ref": "BanyanNLB"
+        },
         "Port": 8443,
         "Protocol": "TCP"
       }
@@ -213,10 +275,14 @@
         "DefaultActions": [
           {
             "Type": "forward",
-            "TargetGroupArn": {"Ref": "BanyanTargetGroup80"}
+            "TargetGroupArn": {
+              "Ref": "BanyanTargetGroup80"
+            }
           }
         ],
-        "LoadBalancerArn": {"Ref": "BanyanNLB"},
+        "LoadBalancerArn": {
+          "Ref": "BanyanNLB"
+        },
         "Port": 80,
         "Protocol": "TCP"
       }
@@ -227,21 +293,77 @@
         "DefaultActions": [
           {
             "Type": "forward",
-            "TargetGroupArn": {"Ref": "BanyanTargetGroup51820"}
+            "TargetGroupArn": {
+              "Ref": "BanyanTargetGroup51820"
+            }
           }
         ],
-        "LoadBalancerArn": {"Ref": "BanyanNLB"},
+        "LoadBalancerArn": {
+          "Ref": "BanyanNLB"
+        },
         "Port": 51820,
         "Protocol": "UDP"
+      }
+    },
+    "BanyanInstanceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        ]
+      }
+    },
+    "BanyanInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "BanyanInstanceRole"
+          }
+        ]
       }
     },
     "BanyanLaunchConfig": {
       "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Properties": {
-        "KeyName": {"Fn::If": ["HasKeyName", {"Ref": "KeyName"}, {"Ref": "AWS::NoValue"}]},
-        "ImageId": {"Fn::If": ["UseCustomAmi", {"Ref": "AmiId"}, {"Ref": "DefaultAmiId"}]},
+        "KeyName": {
+          "Fn::If": [
+            "HasKeyName",
+            {
+              "Ref": "KeyName"
+            },
+            {
+              "Ref": "AWS::NoValue"
+            }
+          ]
+        },
+        "ImageId": {
+          "Fn::If": [
+            "UseCustomAmi",
+            {
+              "Ref": "AmiId"
+            },
+            {
+              "Ref": "DefaultAmiId"
+            }
+          ]
+        },
         "SecurityGroups": [
-          {"Ref": "BanyanSecurityGroup"}
+          {
+            "Ref": "BanyanSecurityGroup"
+          }
         ],
         "InstanceType": "m5.large",
         "BlockDeviceMappings": [
@@ -255,19 +377,22 @@
             "Fn::Join": [
               "",
               [
-                "#!/bin/bash -x\n",
+                "#!/bin/bash\n",
                 "dnf upgrade -y && dnf install -y aws-cfn-bootstrap jq wireguard-tools\n",
-                "/opt/aws/bin/cfn-init -v ",
-                "--resource BanyanLaunchConfig ",
-                "--configsets default ",
-                "--stack ", {"Ref": "AWS::StackName"}, " ",
-                "--region ", { "Ref": "AWS::Region"}, "\n",
-                "export DD_API_KEY=", { "Ref": "DatadogApiKey" }, "\n",
+                "export DD_API_KEY=",
+                {
+                  "Ref": "DatadogApiKey"
+                },
+                "\n",
                 "if [[ -n \"${DD_API_KEY}\" ]]; then\n",
                 "DD_SITE=\"datadoghq.com\" bash -c \"$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)\"\n",
                 "fi\n",
                 "# Determine the version\n",
-                "export VERSION=\"", {"Ref": "BanyanPackage"}, "\"\n",
+                "export VERSION=\"",
+                {
+                  "Ref": "BanyanPackage"
+                },
+                "\"\n",
                 "if [[ \"$VERSION\" == banyan-netagent2-* ]]; then\n",
                 "  VERSION=${VERSION#banyan-netagent2-}\n",
                 "else\n",
@@ -278,18 +403,52 @@
                 "curl -Lo netagent-${VERSION}.tar.gz https://www.banyanops.com/netting/netagent-${VERSION}.tar.gz\n",
                 "tar zxf netagent-${VERSION}.tar.gz\n",
                 "cd $(tar tf netagent-${VERSION}.tar.gz | awk '{print substr($1, 1, length($1)-1); exit}')\n",
-                "echo \"command_center_url: ", {"Ref": "CommandCenterURL"}, "\n",
-                "api_key_secret: ", {"Ref": "ApiKeySecret"}, "\n",
-                "access_tier_name: '", {"Ref": "AWS::StackName"},"'\" > config.yaml\n",
+                "# no 'set -x' anywhere in this script so the API key is never printed to the console log\n",
+                "echo \"command_center_url: ",
+                {
+                  "Ref": "CommandCenterURL"
+                },
+                "\n",
+                "api_key_secret: ",
+                {
+                  "Ref": "ApiKeySecret"
+                },
+                "\n",
+                "access_tier_name: '",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                "'\" > config.yaml\n",
                 "./setup-netagent.sh\n",
+                "SETUP_RC=$?\n",
+                "echo \"BANYAN: setup-netagent.sh exit code $SETUP_RC\"\n",
+                "sleep 20\n",
+                "if ! systemctl is-active --quiet netagent; then\n",
+                "  SETUP_RC=1\n",
+                "  echo \"BANYAN: netagent is not active, diagnostics follow\"\n",
+                "  systemctl status netagent --no-pager -l 2>&1 | tail -30\n",
+                "  journalctl -u netagent --no-pager 2>&1 | tail -40\n",
+                "  tail -60 /var/log/banyan/netagent.log 2>&1\n",
+                "fi\n",
                 "echo 'Port 2222' >> /etc/ssh/sshd_config && /bin/systemctl restart sshd.service\n",
-                "/opt/aws/bin/cfn-signal -e $? ",
+                "/opt/aws/bin/cfn-signal -e $SETUP_RC ",
                 "--resource BanyanASG ",
-                "--stack ", {"Ref": "AWS::StackName"}, " ",
-                "--region ", {"Ref": "AWS::Region"}, "\n"
+                "--stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " ",
+                "--region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\n"
               ]
             ]
           }
+        },
+        "IamInstanceProfile": {
+          "Ref": "BanyanInstanceProfile"
         }
       }
     },
@@ -353,16 +512,16 @@
         }
       }
     },
-    "BanyanCPUPolicy":{
-      "Type":"AWS::AutoScaling::ScalingPolicy",
-      "Properties":{
-        "AutoScalingGroupName":{
-          "Ref":"BanyanASG"
+    "BanyanCPUPolicy": {
+      "Type": "AWS::AutoScaling::ScalingPolicy",
+      "Properties": {
+        "AutoScalingGroupName": {
+          "Ref": "BanyanASG"
         },
-        "PolicyType":"TargetTrackingScaling",
-        "TargetTrackingConfiguration":{
-          "PredefinedMetricSpecification":{
-            "PredefinedMetricType":"ASGAverageCPUUtilization"
+        "PolicyType": "TargetTrackingScaling",
+        "TargetTrackingConfiguration": {
+          "PredefinedMetricSpecification": {
+            "PredefinedMetricType": "ASGAverageCPUUtilization"
           },
           "TargetValue": "80"
         }
@@ -393,7 +552,9 @@
               "Fn::Join": [
                 "-",
                 [
-                  {"Ref": "AWS::StackName"},
+                  {
+                    "Ref": "AWS::StackName"
+                  },
                   "BanyanHost"
                 ]
               ]
@@ -407,10 +568,18 @@
           }
         ],
         "TargetGroupARNs": [
-          {"Ref": "BanyanTargetGroup443"},
-          {"Ref": "BanyanTargetGroup8443"},
-          {"Ref": "BanyanTargetGroup80"},
-          {"Ref": "BanyanTargetGroup51820"}
+          {
+            "Ref": "BanyanTargetGroup443"
+          },
+          {
+            "Ref": "BanyanTargetGroup8443"
+          },
+          {
+            "Ref": "BanyanTargetGroup80"
+          },
+          {
+            "Ref": "BanyanTargetGroup51820"
+          }
         ]
       },
       "CreationPolicy": {
@@ -432,10 +601,20 @@
   },
   "Outputs": {
     "LoadBalancerCanonicalHostedZoneID": {
-      "Value": { "Fn::GetAtt": [ "BanyanNLB", "CanonicalHostedZoneID" ]}
+      "Value": {
+        "Fn::GetAtt": [
+          "BanyanNLB",
+          "CanonicalHostedZoneID"
+        ]
+      }
     },
     "LoadBalancer": {
-      "Value": { "Fn::GetAtt": [ "BanyanNLB", "DNSName" ]}
+      "Value": {
+        "Fn::GetAtt": [
+          "BanyanNLB",
+          "DNSName"
+        ]
+      }
     }
   }
 }
