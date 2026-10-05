@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Banyan Elastic Access Tier v2",
+  "Description": "Banyan Elastic Access Tier v2 (Amazon Linux 2023)",
   "Metadata": {
     "AWS::CloudFormation::Interface": {
       "ParameterGroups" : [
@@ -91,12 +91,12 @@
       "MinLength": "1"
     },
     "DefaultAmiId": {
-      "Description": "Default base AMI",
+      "Description": "Default base AMI (Amazon Linux 2023)",
       "Type":  "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
-      "Default": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+      "Default": "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
     },
     "AmiId": {
-      "Description": "(optional) leave blank to use latest Amazon Linux 2 AMI",
+      "Description": "(optional) leave blank to use latest Amazon Linux 2023 AMI",
       "Type":  "String",
       "Default": ""
     }
@@ -256,12 +256,7 @@
               "",
               [
                 "#!/bin/bash -x\n",
-                "yum update -y '--exclude=kernel*' && yum install -y aws-cfn-bootstrap jq\n",
-                "amazon-linux-extras install -y epel\n",
-                "curl -Lo /etc/yum.repos.d/wireguard.repo ",
-                "https://copr.fedorainfracloud.org/coprs/jdoss/wireguard/repo/epel-7/jdoss-wireguard-epel-7.repo\n",
-                "yum clean all\n",
-                "yum install -y kernel-devel-$(uname -r) wireguard-dkms wireguard-tools\n",
+                "dnf upgrade -y && dnf install -y aws-cfn-bootstrap jq wireguard-tools\n",
                 "/opt/aws/bin/cfn-init -v ",
                 "--resource BanyanLaunchConfig ",
                 "--configsets default ",
@@ -279,7 +274,7 @@
                 "  VERSION=latest\n",
                 "fi\n",
                 "mkdir -p /opt/banyan-packages/\n",
-		"cd /opt/banyan-packages\n",
+                "cd /opt/banyan-packages\n",
                 "curl -Lo netagent-${VERSION}.tar.gz https://www.banyanops.com/netting/netagent-${VERSION}.tar.gz\n",
                 "tar zxf netagent-${VERSION}.tar.gz\n",
                 "cd $(tar tf netagent-${VERSION}.tar.gz | awk '{print substr($1, 1, length($1)-1); exit}')\n",
